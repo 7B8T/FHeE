@@ -134,7 +134,8 @@
             <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入 FHeE 系統</button>
         </div>
     </section>
-        <section id="s-app" class="screen">
+    
+    <section id="s-app" class="screen">
         <div class="app-body">
             <nav class="rail">
                 <div onclick="switchChannel('ch1')" id="nav-ch1" class="nav-icon active"><i class="fa-solid fa-earth-asia"></i></div>
@@ -186,12 +187,12 @@
     </div>
 
     <script>
-        // --- 請在此處配置您的 Firebase 專案憑證 ---
+        // --- 核心修正：已對準您的 Firebase 專案憑證 ---
         const firebaseConfig = {
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com/"
+            databaseURL: "https://fhee-e6867-default-rtdb.firebaseio.com/"
         };
         
-        // 初始化 Firebase (加入強健防錯)
+        // 初始化 Firebase (具備強健防錯)
         let db;
         try {
             if (!firebase.apps.length) {
@@ -241,7 +242,7 @@
             }
             document.getElementById('text-counter').innerText = input.value.length + "/100";
         }
-        // --- 核心帳戶身分驗證（加入連線超時與即時抓錯提示） ---
+        // --- 核心帳戶身分驗證（內含連線防護與警報提示） ---
         function performAuth() {
             const uid = document.getElementById('u-id').value.trim();
             const pw = document.getElementById('u-pw').value.trim();
@@ -255,12 +256,11 @@
             }
 
             if(!db) {
-                errMsg.innerText = "✖ 系統錯誤：Firebase 未正確初始化，請檢查 databaseURL 設定。";
+                errMsg.innerText = "✖ 系統錯誤：Firebase 未正確初始化，請檢查程式碼。";
                 errMsg.style.display = "block";
                 return;
             }
 
-            // 變更按鈕狀態防止重複點擊
             btn.disabled = true;
             btn.innerText = "驗證憑證中...";
             errMsg.style.display = "none";
@@ -269,7 +269,7 @@
             const timeoutTimer = setTimeout(() => {
                 btn.disabled = false;
                 btn.innerText = "登入 FHeE 系統";
-                errMsg.innerText = "✖ 連線超時：無法連接到您的 Firebase 資料庫，請檢查您的網址與網路連線，或確認 Rules 規則是否已公開 (read: true)。";
+                errMsg.innerText = "✖ 連線超時：無法連接到您的 Firebase 資料庫，請檢查您的網路，或確認 Rules 規則是否已公開。";
                 errMsg.style.display = "block";
             }, 6500);
 
@@ -297,9 +297,8 @@
                 clearTimeout(timeoutTimer);
                 btn.disabled = false;
                 btn.innerText = "登入 FHeE 系統";
-                errMsg.innerText = "✖ 資料庫拒絕連線：" + error.message + " (請確認 Firebase Rules 規則的 .read 是否設定為 true)";
+                errMsg.innerText = "✖ 資料庫拒絕連線：" + error.message;
                 errMsg.style.display = "block";
-                console.error("Login Error:", error);
             });
         }
 
@@ -375,7 +374,7 @@
                 } else {
                     chatTitle.innerText = "商業合作專區 (暫無開放子頻道)";
                     document.getElementById('messages').innerHTML = "";
-                    lockInputArea(true, "此大頻道目前無任何開放的子頻道");
+                    lockInputArea(true, "此大頻道目前無 any 開放的子頻道");
                 }
             } else {
                 document.getElementById('nav-ch' + chId.replace('ch','')).className = "nav-icon active";
@@ -688,4 +687,3 @@
     </script>
 </body>
 </html>
-
