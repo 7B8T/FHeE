@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FHeE T-OS 正式防錯完整版</title>
+    <title>FHeE 社群平台 正式版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script>
@@ -19,10 +20,11 @@
         });
         setInterval(function() { function df() { debugger; } df(); }, 100);
     </script>
+
     <style>
         :root { 
             --bg: #000; 
-            --acc: #23a559; 
+            --acc: #23a559; /* 經典社群綠 */
             --text: #fff; 
             --sub: #888; 
             --gold: #e2b43c; 
@@ -36,166 +38,171 @@
             -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
         }
         body, html { margin:0; padding:0; height:100%; background:#000; overflow:hidden; color: var(--text); }
+
+        /* 1. 啟動與加載動畫 */
+        @keyframes tacker-zoom { 0% { transform: scale(3.5); opacity: 0; filter: blur(20px); } 100% { transform: scale(1); opacity: 1; filter: blur(0); } }
+        @keyframes btn-float-up { 0% { transform: translateY(50px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes mc-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #s-intro { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .tacker-logo { font-weight: 900; font-size: 85px; letter-spacing: -5px; color: #000; animation: tacker-zoom 1s forwards; }
+        .entry-btn { margin-top: 50px; padding: 15px 60px; background: #000; color: #fff; border: none; border-radius: 50px; font-weight: bold; opacity: 0; animation: btn-float-up 0.8s 0.8s forwards; cursor: pointer; font-size: 16px; }
+
+        #loading-wrap { display: none; text-align: center; width: 100%; height: 100%; background: #000; position: absolute; top:0; left:0; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .mc-spinner { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--acc); border-radius: 50%; animation: mc-spin 1s linear infinite; margin-bottom: 20px; }
+        .load-rail { width: 250px; height: 8px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
+        .load-bar { width: 0%; height: 100%; background: var(--acc); transition: width 0.1s linear; }
+
+        /* 2. 帳戶登入卡片 */
+        #s-login { background:#0a0c10; align-items:center; justify-content:center; }
+        .login-card { background:#12161f; width:330px; padding:35px 30px; border-radius:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #222; }
+        .login-card h2 { margin:0 0 5px; font-weight: 900; color: var(--text); font-size: 24px; }
+        .login-input { width:100%; padding:14px; background:#000; border:1px solid #333; border-radius:10px; margin-bottom:12px; outline:none; color: #fff; font-size: 14px; }
+        .login-input:focus { border-color: var(--acc); }
+        .login-btn { width:100%; background:var(--acc); color:#fff; padding:15px; border:none; border-radius:10px; font-weight:bold; font-size: 15px; cursor: pointer; margin-top: 10px; }
+
+        /* 3. 主介面社群通訊框架 */
+        #s-app { background: #000; }
+        .app-body { display: flex; height: 100%; width: 100%; }
+        .rail { width: 75px; background: #050505; border-right: 1px solid #151515; display: flex; flex-direction: column; align-items: center; padding: 15px 0; flex-shrink: 0; position: relative; }
+        .nav-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #666; margin-bottom: 15px; font-size: 20px; transition: 0.2s; position: relative; background-size: cover; background-position: center; }
+        .nav-icon:hover { color: #fff; background-color: #111; border-radius: 15px; }
+        .nav-icon.active { color: #000; background-color: var(--acc); border-radius: 15px; box-shadow: 0 0 10px var(--acc); }
+        .nav-icon.active-gold { color: #000; background-color: var(--gold); border-radius: 15px; box-shadow: 0 0 10px var(--gold); }
+        #nav-me { position: absolute; bottom: 20px; color: #555; border: 1px solid #222; }
+        #nav-me:hover { color: var(--acc); border-color: var(--acc); }
         
-        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; display:flex; align-items:center; justify-content:center; }
-        .login-card { background: var(--panel); border:1px solid #1a1a1a; padding:40px; border-radius:12px; width:100%; max-width:360px; text-align:center; }
-        .login-card h2 { margin:0 0 24px 0; font-size:22px; font-weight:600; letter-spacing:1px; }
-        .login-card input { width:100%; padding:12px 16px; background:#121212; border:1px solid #222; border-radius:6px; color:#fff; margin-bottom:16px; outline:none; font-size:14px; }
-        .login-card input:focus { border-color: var(--acc); }
-        .login-card button { width:100%; padding:12px; background: var(--acc); color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px; transition: opacity 0.2s; }
-        .login-card button:hover { opacity: 0.9; }
+        /* 商業子頻道選單 */
+        .sub-channels-sidebar { width: 160px; background: #090c12; border-right: 1px solid #151b26; display: none; flex-direction: column; padding: 15px 8px; flex-shrink: 0; overflow-y: auto; }
+        .sub-ch-item { padding: 10px 12px; border-radius: 8px; color: #8e9297; font-size: 13px; font-weight: bold; cursor: pointer; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.15s; }
+        .sub-ch-item:hover { background: #161c27; color: #dbdee1; }
+        .sub-ch-item.active { background: #232831; color: #fff; }
 
-        #app-layout { display: none; width:100vw; height:100vh; flex-direction:row; }
-        .sidebar { width:72px; background: var(--panel); border-right:1px solid #141414; display:flex; flex-direction:column; align-items:center; padding:20px 0; justify-content:space-between; }
-        .side-menu-top { display:flex; flex-direction:column; gap:16px; width:100%; align-items:center; }
-        .side-icon-btn { width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:20px; color: var(--sub); cursor:pointer; border-radius:8px; transition: 0.2s; }
-        .side-icon-btn:hover, .side-icon-btn.active { background: #141414; color: var(--acc); }
-        .sidebar-pfp { width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #222; cursor:pointer; }
+        /* 主聊天視窗與訊息流 */
+        .main { flex-grow: 1; background: #0e1118; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 60px; background: #07090e; border-bottom: 1px solid #151b26; display: flex; align-items: center; padding: 0 20px; color: #fff; font-weight: bold; font-size: 16px; justify-content: space-between; }
+        #chat-flow { flex-grow: 1; overflow-y: auto; padding: 10px 0 20px; }
+        .msg-row { display: flex; gap: 12px; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.005); }
+        .pfp-mini { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex-shrink: 0; cursor: pointer; background: #222; border: 1px solid #222; }
+        .pfp-mini img { width: 100%; height: 100%; object-fit: cover; }
+        .msg-content-area { flex: 1; min-width: 0; }
+        .msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .msg-username { font-weight: 800; font-size: 14px; color: #fff; cursor: pointer; }
+        .msg-text { color: #dcddde; font-size: 15px; word-break: break-all; white-space: pre-wrap; line-height: 1.4; }
+        .msg-img-body { max-width: 280px; max-height: 200px; width: auto; border-radius: 8px; margin-top: 8px; border: 1px solid #222; display: block; cursor: pointer; }
 
-        .ch-sidebar { width:240px; background: #050505; border-right:1px solid #141414; display:flex; flex-direction:column; padding:20px 12px; }
-        .ch-sidebar h3 { font-size:11px; color: var(--sub); text-transform:uppercase; letter-spacing:1px; margin:0 0 16px 8px; font-weight:600; }
-        .ch-list-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:6px; cursor:pointer; margin-bottom:4px; font-size:14px; color:#aaa; transition: 0.15s; }
-        .ch-list-item:hover { background: #0c0c0c; color:#fff; }
-        .ch-list-item.active { background: #121212; color: var(--acc); font-weight:600; }
-        .ch-avatar-mini { width:20px; height:20px; border-radius:4px; object-fit:cover; background:#111; }
+        /* 身分標籤 */
+        .badge-sys { background: #ff3333; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px; font-weight:bold; margin-left:4px; }
+        .badge-cust { background: #3b82f6; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px; font-weight:bold; margin-left:4px; }
 
-        .main-chat-zone { flex:1; display:flex; flex-direction:column; background: var(--bg); position:relative; }
-        .chat-header { height:64px; border-bottom:1px solid #141414; display:flex; align-items:center; padding:0 24px; background: var(--panel); }
-        .chat-header-title { font-weight:600; font-size:16px; color:#fff; }
-        .chat-header-desc { font-size:12px; color: var(--sub); margin-left:12px; border-left:1px solid #222; padding-left:12px; }
+        /* 輸入區域 */
+        .input-area { padding: 15px 20px; background: #07090e; border-top: 1px solid #151b26; display: flex; gap: 12px; align-items: center; position: relative; }
+        .input-wrap { flex-grow: 1; background: #161b26; border-radius: 12px; padding: 0 15px; display: flex; align-items: center; border: 1px solid #252d3a; }
+        .input-wrap input { flex-grow: 1; background: transparent; border: none; color: #fff; padding: 14px 0; outline: none; font-size: 14px; }
+        .input-wrap input:disabled { color: #555; cursor: not-allowed; }
+        .word-counter { font-size: 11px; color: #555; margin-right: 10px; font-weight: bold; }
 
-        .chat-messages-container { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:20px; }
-        .msg-row { display:flex; gap:12px; align-items:flex-start; max-width:90%; }
-        .msg-avatar { width:38px; height:38px; border-radius:50%; object-fit:cover; cursor:pointer; background:#111; }
-        .msg-content-area { display:flex; flex-direction:column; }
-        .msg-meta { display:flex; align-items:center; gap:8px; font-size:12px; margin-bottom:4px; }
-        .msg-username { font-weight:600; color:#eee; }
-        .msg-ts { color: var(--sub); font-size:11px; }
-        .msg-body { background: #0a0a0a; border:1px solid #121212; padding:10px 14px; border-radius:0 10px 10px 10px; font-size:14px; color:#dfdfdf; line-height:1.5; word-break:break-all; width:fit-content; }
-        .msg-img { max-width:300px; max-height:200px; border-radius:6px; margin-top:6px; border:1px solid #1c1c1c; cursor:pointer; display:block; }
+        /* 彈窗名片與公告 */
+        .screen { position: absolute; width: 100%; height: 100%; display: none; z-index: 10; }
+        .screen.active { display: flex; flex-direction: column; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+        .user-card { width: 330px; background: #0f131c; border-radius: 20px; border: 1px solid #252d3a; text-align: center; overflow: hidden; padding-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative; max-height: 90vh; overflow-y: auto; }
+        .card-banner { height: 95px; background: var(--acc); background-size: cover; background-position: center; position: relative; }
+        .card-pfp { width: 85px; height: 85px; border-radius: 50%; border: 5px solid #0f131c; margin: -45px auto 10px; overflow: hidden; background: #222; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card-pfp img { width:100%; height:100%; object-fit:cover; }
+        .card-bio { background: #07090e; margin: 15px 20px; padding: 12px; border-radius: 10px; font-size: 13px; color: #aaa; text-align: left; border: 1px solid #1a2233; min-height: 50px; word-break: break-all; }
+        .setting-row { text-align: left; padding: 0 20px; margin-bottom: 12px; }
+        .setting-row label { display: block; font-size: 11px; color: #888; font-weight: bold; margin-bottom: 4px; }
+        .setting-input { width: 100%; padding: 10px; background: #07090e; border: 1px solid #222; border-radius: 8px; color: #fff; outline: none; font-size: 13px; }
+        .setting-input:focus { border-color: var(--acc); }
 
-        .chat-input-area { height:68px; background: var(--panel); border-top:1px solid #141414; display:flex; align-items:center; padding:0 24px; gap:16px; }
-        .input-wrapper { flex:1; position:relative; display:flex; align-items:center; }
-        .chat-input { width:100%; padding:12px 44px 12px 14px; background:#111; border:1px solid #222; border-radius:6px; color:#fff; outline:none; font-size:14px; }
-        .chat-input:focus { border-color: #333; }
-        .media-btn { position: absolute; right:16px; color: var(--sub); cursor:pointer; font-size:16px; }
-        .media-btn:hover { color:#fff; }
-        .send-btn { width:40px; height:40px; background: var(--acc); border:none; border-radius:6px; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-        .send-btn:hover { opacity:0.9; }
-
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; align-items:center; justify-content:center; }
-        .modal-content { background: var(--panel); border:1px solid #222; width:100%; max-width:400px; padding:24px; border-radius:12px; position:relative; }
+        #toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 9999; }
+        .os-toast { background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 10px; border-left: 4px solid var(--acc); font-size: 13px; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: bold; }
+        .ann-modal-content { background: #12161f; border: 2px solid var(--gold); padding: 25px; border-radius: 15px; width: 340px; text-align: center; box-shadow: 0 0 25px rgba(226,180,60,0.4); }
         
-        .profile-card { background: var(--panel); border:1px solid #222; width:340px; border-radius:12px; overflow:hidden; position:relative; }
-        .profile-banner { height:84px; background: var(--acc); }
-        .profile-pfp-wrapper { position:absolute; top:44px; left:20px; }
-        .profile-pfp { width:72px; height:72px; border-radius:50%; object-fit:cover; border:4px solid var(--panel); background:#111; }
-        .profile-body { padding:44px 20px 20px 20px; }
-        .profile-name { font-size:18px; font-weight:600; color:#fff; display:flex; align-items:center; gap:6px; }
-        .profile-uid { font-size:12px; color: var(--sub); margin-top:2px; font-family:monospace; }
-        .profile-badges { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; }
-        .profile-bio-box { background:#050505; border:1px solid #141414; padding:12px; border-radius:6px; margin-top:16px; font-size:13px; color:#bbb; min-height:50px; word-break:break-all; }
-
-        .btn-danger { width:100%; padding:11px; background: var(--danger); color:#fff; font-weight:bold; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-        label { display:block; font-size:11px; color: var(--sub); margin-bottom:6px; font-weight:600; text-transform:uppercase; margin-top:12px; }
-        #pane-settings-view input, #pane-settings-view textarea { width:100%; padding:10px; background:#111; border:1px solid #222; border-radius:6px; color:#fff; outline:none; font-size:13px; }
-        #pane-settings-view input:focus, #pane-settings-view textarea:focus { border-color:#333; }
-        #pane-settings-view button { width:100%; padding:11px; border:none; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; margin-top:20px; }
-        
-        .badge-system-offi { background: var(--danger); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; }
-        .badge-custom { background: #2563eb; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; }
+        .btn-logout { width: calc(100% - 40px); background: var(--danger); color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin: 15px 20px 0; transition: opacity 0.2s; }
+        .btn-logout:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-card">
-            <h2>FHeE T-OS</h2>
-            <input id="login-uid" placeholder="使用者帳號 (UID)">
-            <input id="login-pw" type="password" placeholder="登入密碼">
-            <button onclick="handleLogin()">登入系統</button>
-        </div>
+    <div id="toast-container"></div>
+
+    <div id="loading-wrap">
+        <div class="mc-spinner"></div>
+        <div id="load-num" style="font-weight:900; margin-bottom:10px; color:#fff; font-family:monospace; font-size:16px;">0%</div>
+        <div class="load-rail"><div class="load-bar" id="load-bar"></div></div>
+        <div style="color:#555; font-size:11px; margin-top:15px; font-weight:bold; letter-spacing:1px;">FHeE LOADING...</div>
     </div>
 
-    <div id="app-layout">
-        <div class="sidebar">
-            <div class="side-menu-top">
-                <div class="side-icon-btn active" id="btn-nav-chat" onclick="switchView('chat')">
-                    <i class="fa-solid fa-comments"></i>
+    <section id="s-intro" class="screen active">
+        <div class="tacker-logo">FHeE</div>
+        <button id="start-btn" class="entry-btn" onclick="runLoadingAnimation()">進入系統</button>
+    </section>
+
+    <section id="s-login" class="screen">
+        <div class="login-card">
+            <h2>帳戶驗證</h2>
+            <div style="height: 15px;"></div>
+            <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:12px; display:none; font-weight:bold; line-height:1.4; word-break:break-all;"></div>
+            
+            <input id="u-id" class="login-input" placeholder="帳號 ID (UID)" autocomplete="off">
+            <input id="u-pw" type="password" class="login-input" placeholder="驗證密碼">
+            <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入平台</button>
+        </div>
+    </section>
+
+    <section id="s-app" class="screen">
+        <div class="app-body">
+            <nav class="rail">
+                <div onclick="switchChannel('ch1')" id="nav-ch1" class="nav-icon active"></div>
+                <div onclick="switchChannel('ch2')" id="nav-ch2" class="nav-icon"></div>
+                <div onclick="switchChannel('ch3')" id="nav-ch3" class="nav-icon"></div>
+                <div onclick="switchChannel('ch4')" id="nav-ch4" class="nav-icon"></div>
+                <div onclick="switchChannel('ch5')" id="nav-ch5" class="nav-icon"></div>
+                
+                <div id="nav-me" class="nav-icon" onclick="viewMyProfile()"><i class="fa-solid fa-shield-halved"></i></div>
+            </nav>
+
+            <div class="sub-channels-sidebar" id="sub-sidebar">
+                <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:10px; padding-left:4px; text-transform:uppercase; letter-spacing:0.5px;">子頻道列表</div>
+                <div id="sub-channel-list-target"></div>
+            </div>
+
+            <main class="main">
+                <header>
+                    <span id="chat-title">載入中...</span>
+                    <span id="user-status-tag" style="font-size:12px; color:var(--acc); font-weight:bold;"><i class="fa-solid fa-circle"></i> 線上連線正常</span>
+                </header>
+                
+                <div id="chat-flow"><div id="messages"></div></div>
+                
+                <div class="input-area" id="input-area-panel">
+                    <label for="f-in" id="upload-btn-label" style="font-size:22px; color:var(--acc); cursor:pointer;" title="上傳圖片"><i class="fa-solid fa-circle-plus"></i></label>
+                    <input type="file" id="f-in" style="display:none;" onchange="uploadImageHandler(this)" accept="image/*">
+                    
+                    <div class="input-wrap">
+                        <input id="m-input" placeholder="撰寫訊息..." onkeypress="if(event.key==='Enter') sendMessage()" oninput="updateWordCount(this)">
+                        <span class="word-counter" id="text-counter">0/100</span>
+                        <i id="send-plane-icon" class="fa-solid fa-paper-plane" onclick="sendMessage()" style="color:var(--acc); cursor:pointer; font-size:18px;"></i>
+                    </div>
                 </div>
-                <div class="side-icon-btn" id="btn-nav-settings" onclick="switchView('settings')">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-            </div>
-            <div>
-                <img class="sidebar-pfp" id="my-avatar" src="" onclick="openMyProfile()">
-            </div>
+            </main>
         </div>
+    </section>
 
-        <div class="ch-sidebar" id="pane-channels">
-            <h3>文字頻道</h3>
-            <div id="channel-list-box"></div>
-        </div>
-
-        <div class="main-chat-zone" id="pane-chat-view">
-            <div class="chat-header">
-                <div class="chat-header-title" id="active-ch-title">全球大廳</div>
-                <div class="chat-header-desc" id="active-ch-desc">文字聊天頻道</div>
-            </div>
-
-            <div class="chat-messages-container" id="chat-flow"></div>
-
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <input class="chat-input" id="message-input" placeholder="選擇頻道發送通訊...">
-                    <i class="fa-solid fa-image media-btn" onclick="triggerImageUpload()"></i>
-                </div>
-                <button class="send-btn" onclick="sendTextMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-
-        <div class="main-chat-zone" id="pane-settings-view" style="display: none; padding:40px; overflow-y:auto;">
-            <h2 style="font-size:22px; font-weight:600; border-bottom:1px solid #141414; padding-bottom:16px; margin:0;"><i class="fa-solid fa-sliders"></i> 個人核心設定面板</h2>
-            <div style="max-width:480px; background: var(--panel); border:1px solid #1a1a1a; padding:24px; border-radius:8px; margin-top:24px;">
-                <label>更換顯示名稱</label>
-                <input id="set-username">
-                <label>更換頭像網址 (URL)</label>
-                <input id="set-avatar">
-                <label>更換個人橫幅 (可填十六進位色彩代碼或圖片網址)</label>
-                <input id="set-banner">
-                <label>更換個人自介</label>
-                <textarea id="set-bio" rows="3"></textarea>
-                <button onclick="saveMySettings()" style="background: var(--gold); color:#000;"><i class="fa-solid fa-floppy-disk"></i> 儲存並同步我的設定</button>
-                <button class="btn-danger" style="margin-top:12px;" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> 安全登出此帳戶</button>
-            </div>
-        </div>
+    <div id="user-modal" class="modal" onclick="this.style.display='none'">
+        <div class="user-card" id="user-card-body" onclick="event.stopPropagation()"></div>
     </div>
 
     <div id="ann-modal" class="modal">
-        <div class="modal-content">
-            <h2 style="font-size:18px; margin:0; color: var(--danger);"><i class="fa-solid fa-bullhorn"></i> 官方至高廣播公告</h2>
-            <div id="ann-title-text" style="font-weight:600; font-size:15px; margin:16px 0 6px; color:#fff;"></div>
-            <div id="ann-content-text" style="font-size:13px; color:#ccc; line-height:1.5; background:#050505; border:1px solid #141414; padding:12px; border-radius:6px;"></div>
-            <button onclick="closeAnnModal()" style="width:100%; padding:10px; background:#222; color:#fff; border:none; border-radius:6px; margin-top:16px; cursor:pointer; font-weight:bold;">確認並關閉</button>
+        <div class="ann-modal-content">
+            <h2 style="color:var(--gold); margin-top:0;" id="ann-modal-title"><i class="fa-solid fa-bullhorn"></i> 公告</h2>
+            <p style="color:#fff; font-size:14px; text-align:left; line-height:1.5; white-space:pre-wrap;" id="ann-modal-body"></p>
+            <button onclick="document.getElementById('ann-modal').style.display='none'" style="background:var(--gold); color:#000; font-weight:bold; width:100%; padding:10px; border:none; border-radius:6px; cursor:pointer; margin-top:15px;">已閱讀</button>
         </div>
     </div>
-
-    <div id="profile-modal" class="modal" onclick="closeProfileModal()">
-        <div class="profile-card" onclick="event.stopPropagation()">
-            <div class="profile-banner" id="prof-banner"></div>
-            <div class="profile-pfp-wrapper">
-                <img class="profile-pfp" id="prof-pfp" src="">
-            </div>
-            <div class="profile-body">
-                <div class="profile-name" id="prof-name"></div>
-                <div class="profile-uid" id="prof-uid"></div>
-                <div class="profile-badges" id="prof-badges"></div>
-                <div style="font-size:11px; color: var(--sub); font-weight:bold; margin-top:14px; text-transform:uppercase;">個人簡介</div>
-                <div class="profile-bio-box" id="prof-bio"></div>
-            </div>
-        </div>
-    </div>
-    <script>
+        <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCT5bxjkt2xzABRaNaDFyV1zKg5R_yKxzo",
             authDomain: "fhee-e6867.firebaseapp.com",
@@ -211,321 +218,569 @@
         const db = firebase.database();
 
         let myUid = "";
-        let myData = {};
+        let myUserData = {};
         let activeChannelId = "ch1";
         let channelsConfig = {};
         let globalUsers = {};
+        let authTimeout = null;
 
-        window.onload = function() {
-            const autoUid = localStorage.getItem("fhee_logged_uid");
-            const autoTs = localStorage.getItem("fhee_login_ts") || 0;
-            if (autoUid) {
-                db.ref(`users/${autoUid}`).get().then(snap => {
+        // --- 進入系統與加載動畫邏輯 ---
+        function runLoadingAnimation() {
+            document.getElementById('s-intro').classList.remove('active');
+            const wrap = document.getElementById('loading-wrap');
+            wrap.style.display = 'flex';
+            
+            let progress = 0;
+            const bar = document.getElementById('load-bar');
+            const num = document.getElementById('load-num');
+            
+            const timer = setInterval(() => {
+                progress += Math.floor(Math.random() * 8) + 2;
+                if(progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        wrap.style.display = 'none';
+                        checkAutoLogin();
+                    }, 4000);
+                }
+                bar.style.width = progress + '%';
+                num.innerText = progress + '%';
+            }, 60);
+        }
+
+        // --- 自動登入檢查 ---
+        function checkAutoLogin() {
+            const savedUid = localStorage.getItem('fhee_uid');
+            const savedTs = localStorage.getItem('fhee_login_ts') || 0;
+            
+            if(savedUid) {
+                db.ref('users/' + savedUid).get().then(snap => {
                     const u = snap.val();
-                    if (snap.exists() && u.status !== "停權" && (!u.force_logout_ts || u.force_logout_ts <= autoTs)) {
-                        myUid = autoUid;
-                        myData = u;
-                        initSystem();
+                    if(snap.exists() && u.status !== '停權' && (!u.force_logout_ts || u.force_logout_ts <= savedTs)) {
+                        myUid = savedUid;
+                        myUserData = u;
+                        enterApp();
                     } else {
                         localStorage.clear();
+                        showLoginScreen();
                     }
-                }).catch(() => { localStorage.clear(); });
+                }).catch(() => {
+                    localStorage.clear();
+                    showLoginScreen();
+                });
+            } else {
+                showLoginScreen();
             }
-        };
+        }
 
-        function handleLogin() {
-            const uidInput = document.getElementById("login-uid").value.trim().toLowerCase();
-            const pwInput = document.getElementById("login-pw").value.trim();
-            if (!uidInput || !pwInput) return alert("請輸入帳號與密碼");
+        function showLoginScreen() {
+            document.getElementById('s-login').classList.add('active');
+        }
+        // --- 帳戶驗證登入 ---
+        function performAuth() {
+            const uidInput = document.getElementById('u-id').value.trim().toLowerCase();
+            const pwInput = document.getElementById('u-pw').value.trim();
+            const errEl = document.getElementById('login-error-msg');
+            const btn = document.getElementById('login-action-btn');
 
-            db.ref(`users/${uidInput}`).get().then(snap => {
-                if (!snap.exists()) return alert("驗證失敗：帳號不存在或密碼錯誤");
+            if(!uidInput || !pwInput) {
+                errEl.innerText = "請填寫完所有的欄位再進行登入。";
+                errEl.style.display = "block";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "正在驗證帳戶...";
+            errEl.style.display = "none";
+
+            authTimeout = setTimeout(() => {
+                btn.disabled = false;
+                btn.innerText = "登入平台";
+                errEl.innerText = "登入超時，請檢查您的網路連線是否正常。";
+                errEl.style.display = "block";
+            }, 6500);
+
+            db.ref('users/' + uidInput).get().then(snap => {
+                clearTimeout(authTimeout);
+                btn.disabled = false;
+                btn.innerText = "登入平台";
+
+                if(!snap.exists()) {
+                    errEl.innerText = "驗證失敗：帳號不存在或密碼輸入錯誤。";
+                    errEl.style.display = "block";
+                    return;
+                }
+
                 const u = snap.val();
-                if (u.status === "停權") return alert("該帳號已被系統限制登入");
-                if (u.password === pwInput) {
+                if(u.status === '停權') {
+                    errEl.innerText = "您的帳號已被系統限制登入，如有疑問請聯絡管理層。";
+                    errEl.style.display = "block";
+                    return;
+                }
+
+                if(u.password === pwInput) {
                     myUid = uidInput;
-                    myData = u;
-                    localStorage.setItem("fhee_logged_uid", myUid);
-                    localStorage.setItem("fhee_login_ts", Date.now());
-                    initSystem();
+                    myUserData = u;
+                    localStorage.setItem('fhee_uid', myUid);
+                    localStorage.setItem('fhee_login_ts', Date.now());
+                    
+                    document.getElementById('s-login').classList.remove('active');
+                    enterApp();
                 } else {
-                    alert("驗證失敗：帳號不存在或密碼錯誤");
+                    errEl.innerText = "驗證失敗：帳號不存在或密碼輸入錯誤。";
+                    errEl.style.display = "block";
                 }
+            }).catch(err => {
+                clearTimeout(authTimeout);
+                btn.disabled = false;
+                btn.innerText = "登入平台";
+                errEl.innerText = "系統錯誤：" + err.message;
+                errEl.style.display = "block";
             });
         }
 
-        function initSystem() {
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("app-layout").style.display = "flex";
-            document.getElementById("my-avatar").src = myData.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
+        // --- 進入社群主畫面架構 ---
+        function enterApp() {
+            document.getElementById('s-app').classList.add('active');
 
-            db.ref(`users/${myUid}`).on("value", snap => {
-                if (!snap.exists()) { handleLogout(); return; }
+            // 監聽本人的帳號異動（停權與強制登出）
+            db.ref('users/' + myUid).on('value', snap => {
+                if(!snap.exists()) { logoutHandler(); return; }
                 const u = snap.val();
-                if (u.status === "停權") { handleLogout(); return; }
-                const localTs = localStorage.getItem("fhee_login_ts") || 0;
-                if (u.force_logout_ts && u.force_logout_ts > localTs) { handleLogout(); return; }
-                myData = u;
-                document.getElementById("my-avatar").src = myData.avatar;
+                if(u.status === '停權') { logoutHandler(); return; }
+                
+                const currentLoginTs = localStorage.getItem('fhee_login_ts') || 0;
+                if(u.force_logout_ts && u.force_logout_ts > currentLoginTs) {
+                    logoutHandler();
+                    return;
+                }
+                myUserData = u;
             });
 
-            db.ref("users").on("value", snap => { globalUsers = snap.val() || {}; });
-            
-            db.ref("system_announcement").on("value", snap => {
-                if (snap.exists()) {
+            // 監聽全域使用者資料
+            db.ref('users').on('value', snap => {
+                globalUsers = snap.val() || {};
+            });
+
+            // 監聽系統公告
+            db.ref('system_announcement').on('value', snap => {
+                if(snap.exists()) {
                     const ann = snap.val();
-                    document.getElementById("ann-title-text").innerText = ann.title;
-                    document.getElementById("ann-content-text").innerText = ann.content;
-                    document.getElementById("ann-modal").style.display = "flex";
+                    document.getElementById('ann-modal-title').innerHTML = `<i class="fa-solid fa-bullhorn"></i> ` + escapeHTML(ann.title);
+                    document.getElementById('ann-modal-body').innerText = ann.content;
+                    document.getElementById('ann-modal').style.display = 'flex';
                 }
             });
 
-            db.ref("channels_config").on("value", snap => {
+            // 監聽 5 個大頻道的動態設定與圖片
+            db.ref('channels_config').on('value', snap => {
                 channelsConfig = snap.val() || {};
-                renderChannelsMenu();
+                syncChannelsLayout();
             });
         }
 
-        function renderChannelsMenu() {
-            const box = document.getElementById("channel-list-box");
-            box.innerHTML = "";
-
-            const mainChs = [
-                { id: "ch1", title: "全球大廳", pfp: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150" },
-                { id: "ch2", title: channelsConfig.ch2_title || "頻道 2", pfp: channelsConfig.ch2_pfp },
-                { id: "ch3", title: channelsConfig.ch3_title || "頻道 3", pfp: channelsConfig.ch3_pfp },
-                { id: "ch4", title: channelsConfig.ch4_title || "頻道 4", pfp: channelsConfig.ch4_pfp }
+        // --- 同步 5 個大頻道的名稱與圖片顯示 ---
+        function syncChannelsLayout() {
+            const chs = [
+                { id: "ch1", key: "ch1", defTitle: "全球大廳", defPfp: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150" },
+                { id: "ch2", key: "ch2", defTitle: "綜合特區", defPfp: "" },
+                { id: "ch3", key: "ch3", defTitle: "公告欄", defPfp: "" },
+                { id: "ch4", key: "ch4", defTitle: "團隊交友", defPfp: "" },
+                { id: "ch5", key: "ch5", defTitle: "商業合作專區", defPfp: "" }
             ];
 
-            mainChs.forEach(ch => {
-                const div = document.createElement("div");
-                div.className = `ch-list-item ${activeChannelId === ch.id ? "active" : ""}`;
-                div.onclick = () => selectChannel(ch.id, ch.title, "文字聊天頻道");
-                div.innerHTML = `<img class="ch-avatar-mini" src="${ch.pfp || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=150'}"> <span>${escapeHTML(ch.title)}</span>`;
-                box.appendChild(div);
-            });
+            chs.forEach(ch => {
+                const navEl = document.getElementById(`nav-${ch.id}`);
+                if (!navEl) return;
 
-            const ch5Title = channelsConfig.ch5_title || "商業合作專區";
-            const ch5Pfp = channelsConfig.ch5_pfp || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=150";
-            
-            if (channelsConfig.ch5_subs) {
-                Object.keys(channelsConfig.ch5_subs).forEach(subId => {
-                    const sub = channelsConfig.ch5_subs[subId];
-                    if (sub.visible) {
-                        const div = document.createElement("div");
-                        div.className = `ch-list-item ${activeChannelId === subId ? "active" : ""}`;
-                        div.onclick = () => selectChannel(subId, `${ch5Title} > ${sub.name}`, `授權發言標籤: ${sub.requiredBadge || '不限'}`);
-                        div.innerHTML = `<img class="ch-avatar-mini" src="${ch5Pfp}"> <span>${escapeHTML(sub.name)}</span>`;
-                        box.appendChild(div);
-                    }
-                });
-            }
+                // 取得後台動態設定的標題與圖片
+                const title = channelsConfig[`${ch.key}_title`] || ch.defTitle;
+                const pfpUrl = channelsConfig[`${ch.key}_pfp`] || ch.defPfp;
 
-            if (!document.querySelector(".ch-list-item.active") && activeChannelId !== "ch1") {
-                selectChannel("ch1", "全球大廳", "文字聊天頻道");
-            } else {
-                refreshChatHeader();
-            }
-        }
-
-        function selectChannel(id, title, desc) {
-            db.ref(`messages/${activeChannelId}`).off();
-            activeChannelId = id;
-            document.getElementById("active-ch-title").innerText = title;
-            document.getElementById("active-ch-desc").innerText = desc;
-            
-            document.querySelectorAll(".ch-list-item").forEach(item => {
-                if (item.innerText.includes(title.split(" > ").pop())) {
-                    item.classList.add("active");
+                navEl.title = title;
+                
+                if (pfpUrl) {
+                    navEl.style.backgroundImage = `url('${encodeURI(pfpUrl)}')`;
+                    navEl.innerHTML = ""; // 有圖片就清空預設文字或圖示
                 } else {
-                    item.classList.remove("active");
+                    navEl.style.backgroundImage = "none";
+                    if (ch.id === "ch5") {
+                        navEl.innerHTML = `<i class="fa-solid fa-handshake"></i>`;
+                    } else {
+                        navEl.innerHTML = `<i class="fa-solid fa-hashtag"></i>`;
+                    }
                 }
             });
 
+            // 重新刷新目前所在頻道的標題與輸入框狀態
+            refreshActiveChannelUI();
+        }
+        // --- 切換頻道 ---
+        function switchChannel(chId) {
+            db.ref('messages/' + activeChannelId).off();
+            
+            // 處理導覽按鈕選取樣式
+            document.querySelectorAll('.nav-icon').forEach(el => {
+                el.classList.remove('active', 'active-gold');
+            });
+            
+            activeChannelId = chId;
+            const targetNav = document.getElementById(`nav-${chId}`);
+            
+            if (chId === 'ch5') {
+                targetNav.classList.add('active-gold');
+                document.getElementById('sub-sidebar').style.display = 'flex';
+                // 預設進入第一個可見的子頻道
+                renderSubChannelsMenu();
+                return;
+            } else {
+                targetNav.classList.add('active');
+                document.getElementById('sub-sidebar').style.display = 'none';
+            }
+
+            refreshActiveChannelUI();
             listenToMessages();
         }
 
-        function refreshChatHeader() {
-            const currentItem = document.querySelector(".ch-list-item.active");
-            if (!currentItem && activeChannelId === "ch1") {
-                document.getElementById("active-ch-title").innerText = "全球大廳";
-                document.getElementById("active-ch-desc").innerText = "文字聊天頻道";
+        // --- 商業合作子頻道選單渲染 ---
+        function renderSubChannelsMenu() {
+            const targetBox = document.getElementById('sub-channel-list-target');
+            targetBox.innerHTML = "";
+
+            if (!channelsConfig.ch5_subs) {
+                switchChannel('ch1');
+                return;
+            }
+
+            let firstActive = null;
+            Object.keys(channelsConfig.ch5_subs).forEach(subId => {
+                const sub = channelsConfig.ch5_subs[subId];
+                if (sub.visible) {
+                    if (!firstActive) firstActive = subId;
+                    const div = document.createElement('div');
+                    div.className = "sub-ch-item" + (activeChannelId === subId ? " active" : "");
+                    div.innerText = "# " + sub.name;
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        selectSubChannel(subId);
+                    };
+                    targetBox.appendChild(div);
+                }
+            });
+
+            if (activeChannelId === 'ch5' && firstActive) {
+                selectSubChannel(firstActive);
+            } else if (!document.querySelector('.sub-ch-item.active') && firstActive) {
+                selectSubChannel(firstActive);
             }
         }
 
-        function listenToMessages() {
-            const box = document.getElementById("chat-flow");
-            box.innerHTML = "";
+        function selectSubChannel(subId) {
+            db.ref('messages/' + activeChannelId).off();
+            activeChannelId = subId;
+            
+            document.querySelectorAll('.sub-ch-item').forEach(el => el.classList.remove('active'));
+            renderSubChannelsMenu();
+            
+            refreshActiveChannelUI();
+            listenToMessages();
+        }
 
-            db.ref(`messages/${activeChannelId}`).limitToLast(100).on("value", snap => {
-                box.innerHTML = "";
-                if (!snap.exists()) return;
+        // --- 刷新當前聊天室頂部資訊與發言權限鎖 ---
+        function refreshActiveChannelUI() {
+            let currentTitle = "全球大廳";
+            let reqBadge = "";
+
+            if (activeChannelId.startsWith('ch5_sub')) {
+                const subConf = channelsConfig.ch5_subs ? channelsConfig.ch5_subs[activeChannelId] : null;
+                if (subConf) {
+                    const mainTitle = channelsConfig.ch5_title || "商業合作專區";
+                    currentTitle = `${mainTitle} ➔ ${subConf.name}`;
+                    reqBadge = subConf.requiredBadge || "";
+                }
+            } else {
+                currentTitle = channelsConfig[`${activeChannelId}_title`] || 
+                               (activeChannelId === 'ch1' ? "全球大廳" : 
+                                activeChannelId === 'ch2' ? "綜合特區" : 
+                                activeChannelId === 'ch3' ? "公告欄" : "團隊交友");
+            }
+
+            document.getElementById('chat-title').innerText = currentTitle;
+
+            // 檢查發言限制（Discord 唯讀鎖定邏輯）
+            const mInput = document.getElementById('m-input');
+            const fileIn = document.getElementById('f-in');
+            const upLabel = document.getElementById('upload-btn-label');
+
+            if (reqBadge && myUserData.customBadge !== reqBadge && myUserData.role !== 'admin') {
+                mInput.disabled = true;
+                mInput.placeholder = `[唯讀] 您必須擁有「${reqBadge}」成員標籤才能在此發言`;
+                upLabel.style.opacity = "0.3";
+                upLabel.style.pointerEvents = "none";
+            } else {
+                mInput.disabled = false;
+                mInput.placeholder = "撰寫訊息...";
+                upLabel.style.opacity = "1";
+                upLabel.style.pointerEvents = "auto";
+            }
+        }
+
+        // --- 監聽並渲染訊息流 ---
+        function listenToMessages() {
+            const flow = document.getElementById('messages');
+            flow.innerHTML = "";
+
+            db.ref('messages/' + activeChannelId).limitToLast(100).on('value', snap => {
+                flow.innerHTML = "";
+                if(!snap.exists()) return;
 
                 snap.forEach(child => {
                     const m = child.val();
                     const sender = globalUsers[m.uid] || {};
-                    const name = sender.username || m.username || "未知用戶";
-                    const pfp = sender.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
+                    
+                    const name = sender.username || m.username || "未知成員";
+                    const avatar = sender.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
                     const role = sender.role || m.role || "user";
                     const badge = sender.customBadge || m.customBadge || "";
-                    const time = new Date(m.ts).toLocaleTimeString();
+                    const timeStr = new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                    let badgesHTML = "";
-                    if (role === "admin") badgesHTML += `<span class="badge-system-offi">官方 ✔</span>`;
-                    if (badge) badgesHTML += `<span class="badge-custom">${escapeHTML(badge)}</span>`;
+                    let badgesHtml = "";
+                    if(role === 'admin') badgesHtml += `<span class="badge-sys">官方 ✔</span>`;
+                    if(badge) badgesHtml += `<span class="badge-cust">${escapeHTML(badge)}</span>`;
 
-                    let bodyHTML = `<div class="msg-body">${escapeHTML(m.text)}</div>`;
-                    if (m.type === "image") {
-                        bodyHTML = `<img src="${encodeURI(m.imageUrl)}" class="msg-img" onclick="window.open('${encodeURI(m.imageUrl)}','_blank')">`;
+                    let messageBody = `<div class="msg-text">${escapeHTML(m.text)}</div>`;
+                    if(m.type === 'image') {
+                        messageBody = `<img src="${encodeURI(m.imageUrl)}" class="msg-img-body" onclick="window.open('${encodeURI(m.imageUrl)}','_blank')">`;
                     }
 
-                    const div = document.createElement("div");
-                    div.className = "msg-row";
-                    div.innerHTML = `
-                        <img class="msg-avatar" src="${pfp}" onclick="openUserProfile('${m.uid}')">
+                    const row = document.createElement('div');
+                    row.className = "msg-row";
+                    row.innerHTML = `
+                        <div class="pfp-mini" onclick="showUserProfile('${m.uid}')"><img src="${avatar}"></div>
                         <div class="msg-content-area">
                             <div class="msg-meta">
-                                <span class="msg-username">${escapeHTML(name)}</span>
-                                ${badgesHTML}
-                                <span class="msg-ts">${time}</span>
+                                <span class="msg-username" onclick="showUserProfile('${m.uid}')">${escapeHTML(name)}</span>
+                                ${badgesHtml}
+                                <span style="color:#4f545c; font-size:11px; font-weight:bold;">${timeStr}</span>
                             </div>
-                            ${bodyHTML}
+                            ${messageBody}
                         </div>
                     `;
-                    box.appendChild(div);
+                    flow.appendChild(row);
                 });
-                box.scrollTop = box.scrollHeight;
+                
+                const container = document.getElementById('chat-flow');
+                container.scrollTop = container.scrollHeight;
             });
         }
 
-        function sendTextMessage() {
-            const input = document.getElementById("message-input");
+        // --- 發送文字訊息 ---
+        function sendMessage() {
+            const input = document.getElementById('m-input');
             const text = input.value.trim();
-            if (!text) return;
+            if(!text || input.disabled) return;
 
-            if (activeChannelId.startsWith("ch5_sub")) {
-                const subConf = channelsConfig.ch5_subs ? channelsConfig.ch5_subs[activeChannelId] : null;
-                if (subConf && subConf.requiredBadge && myData.customBadge !== subConf.requiredBadge && myData.role !== "admin") {
-                    alert(`權限不足：此頻道限制擁有 [${subConf.requiredBadge}] 標籤之成員發言！`);
-                    return;
-                }
-            }
-
-            db.ref(`messages/${activeChannelId}`).push({
+            db.ref('messages/' + activeChannelId).push({
                 uid: myUid,
-                username: myData.username,
+                username: myUserData.username,
                 text: text,
                 ts: Date.now(),
-                type: "text",
-                role: myData.role,
-                customBadge: myData.customBadge || ""
-            }).then(() => { input.value = ""; });
+                type: 'text',
+                role: myUserData.role,
+                customBadge: myUserData.customBadge || ""
+            }).then(() => {
+                input.value = "";
+                document.getElementById('text-counter').innerText = "0/100";
+            });
+            }
+        // --- 字數計數與強制截斷 ---
+        function updateWordCount(el) {
+            if(el.value.length > 100) {
+                el.value = el.value.substring(0, 100);
+            }
+            document.getElementById('text-counter').innerText = el.value.length + "/100";
         }
 
-        function triggerImageUpload() {
-            const url = prompt("請輸入欲發送的圖片網址 (URL)：");
-            if (!url) return;
+        // --- 上傳圖片（轉 Base64） ---
+        function uploadImageHandler(input) {
+            if(input.disabled || !input.files || !input.files[0]) return;
+            const file = input.files[0];
 
-            if (activeChannelId.startsWith("ch5_sub")) {
-                const subConf = channelsConfig.ch5_subs ? channelsConfig.ch5_subs[activeChannelId] : null;
-                if (subConf && subConf.requiredBadge && myData.customBadge !== subConf.requiredBadge && myData.role !== "admin") {
-                    alert(`權限不足：此頻道限制擁有 [${subConf.requiredBadge}] 標籤之成員發言！`);
+            if(file.size > 3 * 1024 * 1024) {
+                alert("選擇的圖片檔案過大，請選擇 3MB 以下的圖片發送。");
+                input.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                db.ref('messages/' + activeChannelId).push({
+                    uid: myUid,
+                    username: myUserData.username,
+                    imageUrl: base64Data,
+                    ts: Date.now(),
+                    type: 'image',
+                    role: myUserData.role,
+                    customBadge: myUserData.customBadge || ""
+                }).then(() => {
+                    input.value = "";
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- 顯示使用者 Discord 風格檔案名片 ---
+        function showUserProfile(uid) {
+            db.ref('users/' + uid).get().then(snap => {
+                if(!snap.exists()) return;
+                const u = snap.val();
+                const isMe = (uid === myUid);
+
+                let bannerStyle = `background-color: var(--acc);`;
+                if(u.banner && (u.banner.startsWith('http') || u.banner.includes('.'))) {
+                    bannerStyle = `background-image: url('${encodeURI(u.banner)}');`;
+                } else if(u.banner) {
+                    bannerStyle = `background-color: ${escapeHTML(u.banner)};`;
+                }
+
+                let badgesHtml = "";
+                if(u.role === 'admin') badgesHtml += `<span class="badge-sys">官方 ✔</span>`;
+                if(u.customBadge) badgesHtml += `<span class="badge-cust">${escapeHTML(u.customBadge)}</span>`;
+
+                // 動態組裝名片卡片 HTML，完全移除了外部設定頁，功能內建於盾牌名片
+                let html = `
+                    <div class="card-banner" style="${bannerStyle}"></div>
+                    <div class="card-pfp"><img src="${u.avatar || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150'}"></div>
+                    <div style="font-weight:800; color:#fff; font-size:18px; margin-top:5px;">${escapeHTML(u.username)}</div>
+                    <div style="color:#72767d; font-size:12px; font-family:monospace; margin-top:2px;">@${uid}</div>
+                    <div style="display:flex; justify-content:center; gap:4px; margin-top:6px;">${badgesHtml}</div>
+                    <div class="card-bio">${u.bio ? escapeHTML(u.bio) : '這個人很懶，什麼都沒寫。'}</div>
+                `;
+
+                if(isMe) {
+                    html += `
+                        <div style="border-top:1px solid #202225; margin:15px 20px 0; padding-top:10px;"></div>
+                        <div style="font-size:11px; color:var(--gold); font-weight:bold; text-align:left; padding:0 20px 10px; text-transform:uppercase;">修改個人名片設定</div>
+                        
+                        <div class="setting-row">
+                            <label>用戶名稱</label>
+                            <input id="edit-name" class="setting-input" value="${escapeHTML(u.username)}">
+                        </div>
+                        <div class="setting-row">
+                            <label>頭像網址 (URL)</label>
+                            <input id="edit-avatar" class="setting-input" value="${escapeHTML(u.avatar || '')}">
+                        </div>
+                        <div class="setting-row">
+                            <label>自訂橫幅 (色彩代碼或圖片網址)</label>
+                            <input id="edit-banner" class="setting-input" value="${escapeHTML(u.banner || '')}">
+                        </div>
+                        <div class="setting-row">
+                            <label>個人簡介</label>
+                            <input id="edit-bio" class="setting-input" value="${escapeHTML(u.bio || '')}">
+                        </div>
+                        
+                        <div style="border-top:1px solid #202225; margin:15px 20px 0; padding-top:10px;"></div>
+                        <div style="font-size:11px; color:var(--danger); font-weight:bold; text-align:left; padding:0 20px 10px; text-transform:uppercase;">安全密碼修改</div>
+                        <div class="setting-row">
+                            <label>原舊密碼</label>
+                            <input id="edit-pw-old" type="password" class="setting-input" placeholder="請輸入當前的舊密碼">
+                        </div>
+                        <div class="setting-row">
+                            <label>新密碼</label>
+                            <input id="edit-pw-new" type="password" class="setting-input" placeholder="欲更改的新密碼 (至少4字元)">
+                        </div>
+
+                        <button onclick="saveProfileChanges()" style="width:calc(100% - 40px); background:var(--acc); color:#fff; padding:10px; border:none; border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer; margin:15px 20px 0;">儲存並發布名片變更</button>
+                        <button onclick="logoutHandler()" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> 登出帳戶</button>
+                    `;
+                }
+
+                document.getElementById('user-card-body').innerHTML = html;
+                document.getElementById('user-modal').style.display = 'flex';
+            });
+        }
+
+        function viewMyProfile() { showUserProfile(myUid); }
+
+        // --- 儲存個人資料與二步驟變更密碼 ---
+        function saveProfileChanges() {
+            const newName = document.getElementById('edit-name').value.trim();
+            const newAvatar = document.getElementById('edit-avatar').value.trim();
+            const newBanner = document.getElementById('edit-banner').value.trim();
+            const newBio = document.getElementById('edit-bio').value.trim();
+            const pwOld = document.getElementById('edit-pw-old').value.trim();
+            const pwNew = document.getElementById('edit-pw-new').value.trim();
+
+            if(!newName) {
+                alert("您的用戶名稱不能留空。");
+                return;
+            }
+
+            let updatePayload = {
+                username: newName,
+                avatar: newAvatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150",
+                banner: newBanner || "#23a559",
+                bio: newBio || "這個人很懶，什麼都沒寫。"
+            };
+            // 二步驟密碼安全修訂驗證
+            if(pwOld || pwNew) {
+                if(!pwOld || !pwNew) {
+                    alert("若要修改驗證密碼，必須同時確實填寫「原舊密碼」與「新密碼」。");
                     return;
                 }
-            }
-
-            db.ref(`messages/${activeChannelId}`).push({
-                uid: myUid,
-                username: myData.username,
-                imageUrl: url,
-                ts: Date.now(),
-                type: "image",
-                role: myData.role,
-                customBadge: myData.customBadge || ""
-            });
-        }
-
-        document.getElementById("message-input").addEventListener("keydown", e => {
-            if (e.keyCode === 13) sendTextMessage();
-        });
-
-        function switchView(view) {
-            document.getElementById("btn-nav-chat").classList.remove("active");
-            document.getElementById("btn-nav-settings").classList.remove("active");
-            
-            if (view === "chat") {
-                document.getElementById("btn-nav-chat").classList.add("active");
-                document.getElementById("pane-channels").style.display = "flex";
-                document.getElementById("pane-chat-view").style.display = "flex";
-                document.getElementById("pane-settings-view").style.display = "none";
-            } else if (view === "settings") {
-                document.getElementById("btn-nav-settings").classList.add("active");
-                document.getElementById("pane-channels").style.display = "none";
-                document.getElementById("pane-chat-view").style.display = "none";
-                document.getElementById("pane-settings-view").style.display = "block";
-
-                document.getElementById("set-username").value = myData.username || "";
-                document.getElementById("set-avatar").value = myData.avatar || "";
-                document.getElementById("set-banner").value = myData.banner || "";
-                document.getElementById("set-bio").value = myData.bio || "";
-            }
-        }
-
-        function saveMySettings() {
-            const name = document.getElementById("set-username").value.trim();
-            const pfp = document.getElementById("set-avatar").value.trim();
-            const bnr = document.getElementById("set-banner").value.trim();
-            const bio = document.getElementById("set-bio").value.trim();
-
-            if (!name) return alert("顯示名稱不能為空");
-
-            db.ref(`users/${myUid}`).update({
-                username: name,
-                avatar: pfp || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150",
-                banner: bnr || "#23a559",
-                bio: bio || "該用戶很懶，什麼都沒留下..."
-            }).then(() => { alert("設定修改成功！已即時套用全系統。"); });
-        }
-
-        function openUserProfile(uid) {
-            db.ref(`users/${uid}`).get().then(snap => {
-                if (!snap.exists()) return;
-                const u = snap.val();
-
-                const bannerEl = document.getElementById("prof-banner");
-                if (u.banner && (u.banner.startsWith("http://") || u.banner.startsWith("https://") || u.banner.includes("."))) {
-                    bannerEl.style.background = `url('${encodeURI(u.banner)}') center/cover no-repeat`;
-                } else {
-                    bannerEl.style.background = u.banner || "var(--acc)";
+                if(pwOld !== myUserData.password) {
+                    alert("密碼修改失敗：原舊密碼輸入錯誤，未通過身份安全驗證。");
+                    return;
                 }
+                if(pwNew.length < 4) {
+                    alert("變更失敗：新密碼長度不足，長度至少需要包含 4 個字元。");
+                    return;
+                }
+                updatePayload.password = pwNew;
+            }
 
-                document.getElementById("prof-pfp").src = u.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
-                document.getElementById("prof-name").innerText = u.username || "未命名";
-                document.getElementById("prof-uid").innerText = `@${uid}`;
-                document.getElementById("prof-bio").innerText = u.bio || "該用戶很懶，什麼都沒留下...";
-
-                const badgeBox = document.getElementById("prof-badges");
-                badgeBox.innerHTML = "";
-                if (u.role === "admin") badgeBox.innerHTML += `<span class="badge-system-offi">官方 ✔</span>`;
-                if (u.customBadge) badgeBox.innerHTML += `<span class="badge-custom">${escapeHTML(u.customBadge)}</span>`;
-
-                document.getElementById("profile-modal").style.display = "flex";
+            db.ref('users/' + myUid).update(updatePayload).then(() => {
+                showToast("個人資料與設定已成功發布更新！");
+                document.getElementById('user-modal').style.display = 'none';
+            }).catch(err => {
+                alert("儲存失敗：" + err.message);
             });
         }
 
-        function openMyProfile() { openUserProfile(myUid); }
-        function closeProfileModal() { document.getElementById("profile-modal").style.display = "none"; }
-        function closeAnnModal() { document.getElementById("ann-modal").style.display = "none"; }
-
-        function handleLogout() {
+        // --- 登出與重新整理處理 ---
+        function logoutHandler() {
+            db.ref('messages/' + activeChannelId).off();
+            db.ref('users/' + myUid).off();
+            db.ref('channels_config').off();
+            db.ref('system_announcement').off();
+            
             localStorage.clear();
             location.reload();
         }
 
+        // --- 全域社群通知提示 ---
+        function showToast(text) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = "os-toast";
+            el.innerText = text;
+            container.appendChild(el);
+            
+            setTimeout(() => {
+                el.style.opacity = "0";
+                el.style.transition = "opacity 0.5s";
+                setTimeout(() => el.remove(), 500);
+            }, 4000);
+        }
+
+        // --- HTML 安全過濾防止注入破壞 ---
         function escapeHTML(str) {
-            if (!str) return "";
+            if(!str) return "";
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
     </script>
 </body>
-</html>
+</html>                
+                    
