@@ -6,6 +6,7 @@
     <title>FHeE T-OS 正式版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- 引入 Firebase Compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -44,7 +45,6 @@
         #s-login { background:#0a0c10; align-items:center; justify-content:center; }
         .login-card { background:#12161f; width:330px; padding:35px 30px; border-radius:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #222; }
         .login-card h2 { margin:0 0 5px; font-weight: 900; color: var(--text); font-size: 24px; }
-        .reg-link { font-size: 12px; color: var(--acc); text-decoration: none; display: inline-block; margin-bottom: 25px; font-weight: bold; }
         .login-input { width:100%; padding:14px; background:#000; border:1px solid #333; border-radius:10px; margin-bottom:12px; outline:none; color: #fff; font-size: 14px; }
         .login-input:focus { border-color: var(--acc); }
         .login-btn { width:100%; background:var(--acc); color:#fff; padding:15px; border:none; border-radius:10px; font-weight:bold; font-size: 15px; cursor: pointer; margin-top: 10px; }
@@ -97,7 +97,6 @@
         /* 4. 彈窗與磨砂玻璃卡片 */
         .screen { position: absolute; width: 100%; height: 100%; display: none; z-index: 10; }
         .screen.active { display: flex; flex-direction: column; }
-        
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
         
         /* 使用者卡片 */
@@ -119,7 +118,6 @@
     </style>
 </head>
 <body>
-
     <div id="toast-container"></div>
 
     <div id="loading-wrap">
@@ -137,7 +135,7 @@
     <section id="s-login" class="screen">
         <div class="login-card">
             <h2>帳戶驗證</h2>
-            <a href="https://forms.gle/xxxxxx" target="_blank" class="reg-link" style="color:var(--acc); text-decoration:none; font-size:12px; display:block; margin-bottom:20px;"> 沒有帳戶？點此申請註冊</a>
+            <div style="height: 15px;"></div>
             <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:10px; display:none; font-weight:bold;"></div>
             
             <input id="u-id" class="login-input" placeholder="帳號 ID (UID)" autocomplete="off">
@@ -172,7 +170,7 @@
                 <div id="chat-flow"><div id="messages"></div></div>
                 
                 <div class="input-area" id="input-area-panel">
-                    <label Skinner for="f-in" id="upload-btn-label" style="font-size:22px; color:var(--acc); cursor:pointer;" title="上傳圖片"><i class="fa-solid fa-circle-plus"></i></label>
+                    <label for="f-in" id="upload-btn-label" style="font-size:22px; color:var(--acc); cursor:pointer;" title="上傳圖片"><i class="fa-solid fa-circle-plus"></i></label>
                     <input type="file" id="f-in" style="display:none;" onchange="uploadImageHandler(this)" accept="image/*">
                     
                     <div class="input-wrap">
@@ -186,8 +184,7 @@
     </section>
 
     <div id="user-modal" class="modal" onclick="this.style.display='none'">
-        <div class="user-card" id="user-card-body" onclick="event.stopPropagation()">
-            </div>
+        <div class="user-card" id="user-card-body" onclick="event.stopPropagation()"></div>
     </div>
 
     <div id="ann-modal" class="modal">
@@ -197,8 +194,83 @@
             <button onclick="document.getElementById('ann-modal').style.display='none'" style="background:var(--gold); color:#000; font-weight:bold; width:100%; padding:10px; border:none; border-radius:6px; cursor:pointer; margin-top:15px;">已閱閉</button>
         </div>
     </div>
-     <!-- 5. 核心 JavaScript 控制邏輯 -->
-    <script>
+    <div id="toast-container"></div>
+
+    <div id="loading-wrap">
+        <div class="mc-spinner"></div>
+        <div id="load-num" style="font-weight:900; margin-bottom:10px; color:#fff; font-family:monospace; font-size:16px;">0%</div>
+        <div class="load-rail"><div class="load-bar" id="load-bar"></div></div>
+        <div style="color:#555; font-size:11px; margin-top:15px; font-weight:bold; letter-spacing:1px;">FHeE T-OS LOADING...</div>
+    </div>
+
+    <section id="s-intro" class="screen active">
+        <div class="tacker-logo">FHeE</div>
+        <button id="start-btn" class="entry-btn" onclick="runLoadingAnimation()">進入系統</button>
+    </section>
+
+    <section id="s-login" class="screen">
+        <div class="login-card">
+            <h2>帳戶驗證</h2>
+            <div style="height: 15px;"></div>
+            <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:10px; display:none; font-weight:bold;"></div>
+            
+            <input id="u-id" class="login-input" placeholder="帳號 ID (UID)" autocomplete="off">
+            <input id="u-pw" type="password" class="login-input" placeholder="驗證密碼">
+            <button onclick="performAuth()" class="login-btn">登入 FHeE 系統</button>
+        </div>
+    </section>
+
+    <section id="s-app" class="screen">
+        <div class="app-body">
+            <nav class="rail">
+                <div onclick="switchChannel('ch1')" id="nav-ch1" class="nav-icon active"><i class="fa-solid fa-earth-asia"></i></div>
+                <div onclick="switchChannel('ch2')" id="nav-ch2" class="nav-icon" title="頻道 2"><i class="fa-solid fa-hashtag"></i></div>
+                <div onclick="switchChannel('ch3')" id="nav-ch3" class="nav-icon" title="頻道 3"><i class="fa-solid fa-hashtag"></i></div>
+                <div onclick="switchChannel('ch4')" id="nav-ch4" class="nav-icon" title="頻道 4"><i class="fa-solid fa-hashtag"></i></div>
+                <div onclick="switchChannel('ch5')" id="nav-ch5" class="nav-icon" title="商業合作專區"><i class="fa-solid fa-handshake"></i></div>
+                
+                <div id="nav-me" class="nav-icon" onclick="viewMyProfile()"><i class="fa-solid fa-shield-halved"></i></div>
+            </nav>
+
+            <div class="sub-channels-sidebar" id="sub-sidebar">
+                <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:10px; padding-left:4px; text-transform:uppercase; letter-spacing:0.5px;">子頻道列表</div>
+                <div id="sub-channel-list-target"></div>
+            </div>
+
+            <main class="main">
+                <header>
+                    <span id="chat-title">全球大廳</span>
+                    <span id="user-status-tag" style="font-size:12px; color:var(--acc); font-weight:bold;"><i class="fa-solid fa-circle"></i> 系統連線正常</span>
+                </header>
+                
+                <div id="chat-flow"><div id="messages"></div></div>
+                
+                <div class="input-area" id="input-area-panel">
+                    <label for="f-in" id="upload-btn-label" style="font-size:22px; color:var(--acc); cursor:pointer;" title="上傳圖片"><i class="fa-solid fa-circle-plus"></i></label>
+                    <input type="file" id="f-in" style="display:none;" onchange="uploadImageHandler(this)" accept="image/*">
+                    
+                    <div class="input-wrap">
+                        <input id="m-input" placeholder="撰寫訊息..." onkeypress="if(event.key==='Enter') sendMessage()" oninput="updateWordCount(this)">
+                        <span class="word-counter" id="text-counter">0/100</span>
+                        <i id="send-plane-icon" class="fa-solid fa-paper-plane" onclick="sendMessage()" style="color:var(--acc); cursor:pointer; font-size:18px;"></i>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <div id="user-modal" class="modal" onclick="this.style.display='none'">
+        <div class="user-card" id="user-card-body" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <div id="ann-modal" class="modal">
+        <div class="ann-modal-content">
+            <h2 style="color:var(--gold); margin-top:0;" id="ann-modal-title"><i class="fa-solid fa-bullhorn"></i> 官機小公告</h2>
+            <p style="color:#fff; font-size:14px; text-align:left; line-height:1.5; white-space:pre-wrap;" id="ann-modal-body"></p>
+            <button onclick="document.getElementById('ann-modal').style.display='none'" style="background:var(--gold); color:#000; font-weight:bold; width:100%; padding:10px; border:none; border-radius:6px; cursor:pointer; margin-top:15px;">已閱閉</button>
+        </div>
+    </div>
+        <script>
         // --- 請在此處配置您的 Firebase 專案憑證 ---
         const firebaseConfig = {
             databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com/"
@@ -215,8 +287,8 @@
         let myUserData = null;
         let currentCh = "ch1";
         let currentSubCh = "";
-        let channelChannelsData = {}; // 存放後台同步的子頻道設定
-        let channelListeners = {};     // 監聽器快取，防重複監聽
+        let channelChannelsData = {}; 
+        let channelListeners = {};     
 
         // --- 進入動畫與加載條控制 ---
         function runLoadingAnimation() {
@@ -262,7 +334,6 @@
                 return;
             }
 
-            // 讀取後台使用者節點
             db.ref('users/' + uid).once('value').then(snapshot => {
                 const userData = snapshot.val();
                 if(!userData || userData.password !== pw) {
@@ -271,31 +342,25 @@
                     return;
                 }
 
-                // 登入成功，寫入全域狀態
                 myUid = uid;
                 myUserData = userData;
                 
-                // 跳轉至主通訊面板
                 document.getElementById('s-login').style.display = 'none';
                 document.getElementById('s-app').style.display = 'flex';
                 
                 showToast("🔓 帳戶驗證成功，歡迎回到 FHeE T-OS！");
-                
-                // 啟動全域即時監聽系統
                 initRealtimeListeners();
             });
         }
 
         // --- 系統即時監聽核心 ---
         function initRealtimeListeners() {
-            // 1. 監聽當前登入者自身資料（隨時同步頭像、橫幅、標籤等變更）
             db.ref('users/' + myUid).on('value', snapshot => {
                 if(snapshot.exists()) {
                     myUserData = snapshot.val();
                 }
             });
 
-            // 2. 監聽全服即時公告
             db.ref('system_announcement').on('value', snapshot => {
                 const ann = snapshot.val();
                 if(ann) {
@@ -305,15 +370,12 @@
                 }
             });
 
-            // 3. 監聽子頻道設定（隨時讀取最新標籤要求與開啟狀態）
             db.ref('sub_channels').on('value', snapshot => {
                 channelChannelsData = snapshot.val() || {};
                 renderSubChannelsMenu();
-                // 刷新當前所在頻道的發言權限狀態
                 checkChannelPermission();
             });
 
-            // 4. 自動載入初始預設大廳的訊息流
             loadMessagesFlow(currentCh);
         }
 
@@ -322,7 +384,6 @@
             const container = document.getElementById('sub-channel-list-target');
             container.innerHTML = "";
             
-            // 依序渲染 ch5_sub1 ~ ch5_sub5
             for(let i = 1; i <= 5; i++) {
                 const key = 'ch5_sub' + i;
                 const config = channelChannelsData[key] || { name: `未定義子頻道 ${i}`, requiredBadge: "", visible: false };
@@ -336,10 +397,8 @@
                 }
             }
         }
-
-        // --- 大頻道與子頻道切換控制 ---
+        // --- 大頻道與子頻道切換控制 (3-2) ---
         function switchChannel(chId) {
-            // 清除圖示啟動樣式
             for(let i = 1; i <= 5; i++) {
                 document.getElementById('nav-ch' + i).className = "nav-icon";
             }
@@ -352,7 +411,6 @@
                 document.getElementById('nav-ch5').className = "nav-icon active-gold";
                 subSidebar.style.display = "flex";
                 
-                // 預設切入第一個可見的子頻道
                 let firstVisibleSub = "";
                 for(let i = 1; i <= 5; i++) {
                     if(channelChannelsData['ch5_sub' + i]?.visible) {
@@ -369,7 +427,6 @@
                     lockInputArea(true, "此大頻道目前無任何開放的子頻道");
                 }
             } else {
-                // 一般大頻道 1 ~ 4
                 document.getElementById('nav-ch' + chId.replace('ch','')).className = "nav-icon active";
                 subSidebar.style.display = "none";
                 currentSubCh = "";
@@ -395,26 +452,21 @@
 
         // --- 發言權限硬核判定安全鎖 ---
         function checkChannelPermission() {
-            // 如果是官方高權限帳號，直接放行
             if(myUserData && myUserData.role === "admin") {
                 lockInputArea(false);
                 return;
             }
 
-            // 如果目前是在子頻道中
             if(currentSubCh) {
                 const config = channelChannelsData[currentSubCh];
                 if(config && config.requiredBadge) {
                     const req = config.requiredBadge.trim();
-                    // 檢查使用者是否擁有該自訂標籤
                     if(!myUserData || !myUserData.customBadge || myUserData.customBadge.trim() !== req) {
                         lockInputArea(true, `[唯讀] 您必須擁有「${req}」身分標籤才可在此發言`);
                         return;
                     }
                 }
             }
-            
-            // 條件皆通過，解鎖輸入框
             lockInputArea(false);
         }
 
@@ -445,8 +497,6 @@
         // --- 訊息流動態載入與渲染 ---
         function loadMessagesFlow(targetNode) {
             const container = document.getElementById('messages');
-            
-            // 清除舊頻道的監聽，避免混亂
             if(channelListeners.currentRef) {
                 channelListeners.currentRef.off();
             }
@@ -454,7 +504,6 @@
             const targetRef = db.ref('messages/' + targetNode);
             channelListeners.currentRef = targetRef;
 
-            // 監聽該節點最後 60 條訊息
             targetRef.limitToLast(60).on('value', snapshot => {
                 container.innerHTML = "";
                 if(!snapshot.exists()) {
@@ -467,7 +516,6 @@
                     const row = document.createElement('div');
                     row.className = "msg-row";
 
-                    // 處理官方特殊紅色標籤與一般自訂標籤
                     let badgeHTML = "";
                     if(m.role === "admin") {
                         badgeHTML = `<span class="badge-sys">官方</span>`;
@@ -475,13 +523,11 @@
                         badgeHTML = `<span class="badge-cust">${escapeHTML(m.customBadge)}</span>`;
                     }
 
-                    // 處理純文字或圖片訊息渲染
                     let bodyHTML = `<div class="msg-text">${escapeHTML(m.text)}</div>`;
                     if(m.type === "image") {
                         bodyHTML = `<img src="${encodeURI(m.imageUrl)}" class="msg-img-body" onclick="window.open('${encodeURI(m.imageUrl)}','_blank')">`;
                     }
 
-                    // 預設大頭照與自訂大頭照
                     const avatarUrl = m.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
 
                     row.innerHTML = `
@@ -498,8 +544,6 @@
                     `;
                     container.appendChild(row);
                 });
-
-                // 自動捲動至最底部
                 document.getElementById('chat-flow').scrollTop = document.getElementById('chat-flow').scrollHeight;
             });
         }
@@ -533,7 +577,6 @@
             const file = fileInput.files[0];
             if(!file) return;
 
-            // 限制 3MB 圖片大小
             if(file.size > 3000000) {
                 alert("圖片體積過大！請上傳 3MB 以下的圖片。");
                 fileInput.value = "";
@@ -563,7 +606,7 @@
             reader.readAsDataURL(file);
         }
 
-        // --- 彈窗：個人帳戶資料卡（包含自訂上傳與二步驟密碼修改） ---
+        // --- 彈窗：個人帳戶資料卡（高自由度自訂控制台） ---
         function viewMyProfile() {
             openUserProfileCard(myUid);
         }
@@ -575,10 +618,8 @@
 
                 const modal = document.getElementById('user-modal');
                 const body = document.getElementById('user-card-body');
-                
                 const isMe = (targetUid === myUid);
                 
-                // 頭像與橫幅樣式解析
                 const avatar = user.avatar || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150";
                 const bannerStyle = user.banner ? (user.banner.startsWith('http') ? `background-image:url('${user.banner}')` : `background:${user.banner}`) : `background:var(--acc)`;
                 const bioText = user.bio || "這個人很懶，什麼都沒留下。";
@@ -590,7 +631,6 @@
                     badgeHTML = `<span class="badge-cust" style="vertical-align:middle; margin-left:5px;">${escapeHTML(user.customBadge)}</span>`;
                 }
 
-                // 基礎個人卡片上半部
                 let html = `
                     <div class="card-banner" style="${bannerStyle}"></div>
                     <div class="card-pfp">
@@ -598,10 +638,9 @@
                     </div>
                     <h3 style="margin:0; font-weight:900; font-size:18px;">${escapeHTML(user.username)} ${badgeHTML}</h3>
                     <div style="font-size:11px; color:#555; margin-top:2px;">UID: ${targetUid}</div>
-                    <div class="card-bio" id="card-bio-render">${escapeHTML(bioText)}</div>
+                    <div class="card-bio">${escapeHTML(bioText)}</div>
                 `;
 
-                // 如果點擊的是自己的帳戶，解鎖高自由度修改控制台
                 if(isMe) {
                     html += `
                         <div style="border-top:1px solid #1a2233; margin-top:20px; padding-top:15px;">
@@ -612,15 +651,14 @@
                                 <input id="edit-avatar" class="setting-input" value="${escapeHTML(user.avatar || '')}" placeholder="輸入自訂圖片連結">
                             </div>
                             <div class="setting-row">
-                                <label>自訂主題橫幅 (支援顏色十六進位碼或圖片網址)</label>
-                                <input id="edit-banner" class="setting-input" value="${escapeHTML(user.banner || '')}" placeholder="例如: #ff00ff 或 網址">
+                                <label>自訂主題橫幅 (支援十六進位顏色碼或圖片網址)</label>
+                                <input id="edit-banner" class="setting-input" value="${escapeHTML(user.banner || '')}" placeholder="例如: #ff00ff 或 圖片網址">
                             </div>
                             <div class="setting-row">
                                 <label>個性簽名 / 個人簡介</label>
                                 <textarea id="edit-bio" class="setting-input" style="height:60px; resize:none; font-family:inherit;">${escapeHTML(user.bio || '')}</textarea>
                             </div>
 
-                            <!-- 二步驟密碼安全修改區 -->
                             <div style="margin:20px 20px 10px; padding:12px; background:#07090e; border:1px dashed #222; border-radius:8px; text-align:left;">
                                 <div style="font-size:11px; color:var(--danger); font-weight:bold; margin-bottom:8px;"><i class="fa-solid fa-key"></i> 安全變更密碼 (二步驟驗證)</div>
                                 <input type="password" id="pw-old" class="setting-input" placeholder="步驟 1：請先輸入舊密碼" style="margin-bottom:8px; background:#12161f;">
@@ -634,7 +672,6 @@
                         </div>
                     `;
                 } else {
-                    // 他人卡片僅有關閉按鈕
                     html += `<button onclick="document.getElementById('user-modal').style.display='none'" style="margin-top:10px; background:#1c2331; color:#fff; border:none; padding:8px 25px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px;">關閉面板</button>`;
                 }
 
@@ -653,7 +690,6 @@
 
             let updatePayload = { avatar, banner, bio };
 
-            // 處理密碼變更判定 (二步驟驗證)
             if(pwOld || pwNew) {
                 if(!pwOld || !pwNew) {
                     alert("⚠️ 更改密碼失敗：必須同時填寫「舊密碼」與「新密碼」才能完成二步驟安全驗證！");
@@ -667,11 +703,9 @@
                     alert("⚠️ 新密碼長度過短，請重新輸入。");
                     return;
                 }
-                // 通過驗證，寫入新密碼
                 updatePayload.password = pwNew;
             }
 
-            // 更新到 Firebase
             db.ref('users/' + myUid).update(updatePayload).then(() => {
                 showToast("💾 個人設定與安全憑證已同步儲存成功！");
                 document.getElementById('user-modal').style.display = 'none';
