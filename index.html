@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FHeE T-OS 正式完整版</title>
+    <title>FHeE T-OS 正式防錯完整版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -26,7 +26,7 @@
         }
         body, html { margin:0; padding:0; height:100%; background:#000; overflow:hidden; color: var(--text); }
 
-        /* 1. 啟動與 Minecraft 風格加載動畫 */
+        /* 1. 啟動與 Minecraft 風格加載 */
         @keyframes tacker-zoom { 0% { transform: scale(3.5); opacity: 0; filter: blur(20px); } 100% { transform: scale(1); opacity: 1; filter: blur(0); } }
         @keyframes btn-float-up { 0% { transform: translateY(50px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
         @keyframes mc-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -40,7 +40,7 @@
         .load-rail { width: 250px; height: 8px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
         .load-bar { width: 0%; height: 100%; background: var(--acc); transition: width 0.1s linear; }
 
-        /* 2. 帳戶驗證介面 */
+        /* 2. 帳戶驗證登入卡片 */
         #s-login { background:#0a0c10; align-items:center; justify-content:center; }
         .login-card { background:#12161f; width:330px; padding:35px 30px; border-radius:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #222; }
         .login-card h2 { margin:0 0 5px; font-weight: 900; color: var(--text); font-size: 24px; }
@@ -48,7 +48,7 @@
         .login-input:focus { border-color: var(--acc); }
         .login-btn { width:100%; background:var(--acc); color:#fff; padding:15px; border:none; border-radius:10px; font-weight:bold; font-size: 15px; cursor: pointer; margin-top: 10px; }
 
-        /* 3. 主面板版面與側邊欄 */
+        /* 3. 主介面通訊框架 */
         #s-app { background: #000; }
         .app-body { display: flex; height: 100%; width: 100%; }
         .rail { width: 75px; background: #050505; border-right: 1px solid #151515; display: flex; flex-direction: column; align-items: center; padding: 15px 0; flex-shrink: 0; position: relative; }
@@ -58,8 +58,7 @@
         .nav-icon.active-gold { color: #000; background: var(--gold); border-radius: 15px; box-shadow: 0 0 10px var(--gold); }
         #nav-me { position: absolute; bottom: 20px; color: #555; border: 1px solid #222; }
         #nav-me:hover { color: var(--acc); border-color: var(--acc); }
-
-        /* 商業子頻道列表 */
+        /* 商業子頻道選單 */
         .sub-channels-sidebar { width: 160px; background: #090c12; border-right: 1px solid #151b26; display: none; flex-direction: column; padding: 15px 8px; flex-shrink: 0; overflow-y: auto; }
         .sub-ch-item { padding: 10px 12px; border-radius: 8px; color: #8e9297; font-size: 13px; font-weight: bold; cursor: pointer; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.15s; }
         .sub-ch-item:hover { background: #161c27; color: #dbdee1; }
@@ -78,18 +77,18 @@
         .msg-text { color: #dcddde; font-size: 15px; word-break: break-all; white-space: pre-wrap; line-height: 1.4; }
         .msg-img-body { max-width: 280px; max-height: 200px; width: auto; border-radius: 8px; margin-top: 8px; border: 1px solid #222; display: block; cursor: pointer; }
 
-        /* 標籤群組 */
+        /* 身分標籤 */
         .badge-sys { background: #ff3333; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px; font-weight:bold; margin-left:4px; }
         .badge-cust { background: #3b82f6; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px; font-weight:bold; margin-left:4px; }
 
-        /* 輸入區域與字數統計 */
+        /* 輸入區域 */
         .input-area { padding: 15px 20px; background: #07090e; border-top: 1px solid #151b26; display: flex; gap: 12px; align-items: center; position: relative; }
         .input-wrap { flex-grow: 1; background: #161b26; border-radius: 12px; padding: 0 15px; display: flex; align-items: center; border: 1px solid #252d3a; }
         .input-wrap input { flex-grow: 1; background: transparent; border: none; color: #fff; padding: 14px 0; outline: none; font-size: 14px; }
         .input-wrap input:disabled { color: #555; cursor: not-allowed; }
         .word-counter { font-size: 11px; color: #555; margin-right: 10px; font-weight: bold; }
 
-        /* 彈窗元件、使用者神盾卡 */
+        /* 磨砂玻璃卡片與系統公告彈窗 */
         .screen { position: absolute; width: 100%; height: 100%; display: none; z-index: 10; }
         .screen.active { display: flex; flex-direction: column; }
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
@@ -109,6 +108,7 @@
     </style>
 </head>
 <body>
+
     <div id="toast-container"></div>
 
     <div id="loading-wrap">
@@ -127,15 +127,14 @@
         <div class="login-card">
             <h2>帳戶驗證</h2>
             <div style="height: 15px;"></div>
-            <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:10px; display:none; font-weight:bold;"></div>
+            <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:12px; display:none; font-weight:bold; line-height:1.4; word-break:break-all;"></div>
             
             <input id="u-id" class="login-input" placeholder="帳號 ID (UID)" autocomplete="off">
             <input id="u-pw" type="password" class="login-input" placeholder="驗證密碼">
-            <button onclick="performAuth()" class="login-btn">登入 FHeE 系統</button>
+            <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入 FHeE 系統</button>
         </div>
     </section>
-
-    <section id="s-app" class="screen">
+        <section id="s-app" class="screen">
         <div class="app-body">
             <nav class="rail">
                 <div onclick="switchChannel('ch1')" id="nav-ch1" class="nav-icon active"><i class="fa-solid fa-earth-asia"></i></div>
@@ -185,17 +184,23 @@
             <button onclick="document.getElementById('ann-modal').style.display='none'" style="background:var(--gold); color:#000; font-weight:bold; width:100%; padding:10px; border:none; border-radius:6px; cursor:pointer; margin-top:15px;">已閱閉</button>
         </div>
     </div>
-        <script>
+
+    <script>
         // --- 請在此處配置您的 Firebase 專案憑證 ---
         const firebaseConfig = {
             databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com/"
         };
         
-        // 初始化 Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        // 初始化 Firebase (加入強健防錯)
+        let db;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+        } catch (e) {
+            console.error("Firebase 初始化失敗：", e);
         }
-        const db = firebase.database();
 
         // 系統全域狀態快取
         let myUid = "";
@@ -205,7 +210,7 @@
         let channelChannelsData = {}; 
         let channelListeners = {};     
 
-        // --- 進入動畫與加載條控制 (確保按鈕絕對可按) ---
+        // --- 進入動畫與加載條控制 ---
         function runLoadingAnimation() {
             document.getElementById('s-intro').style.display = 'none';
             document.getElementById('loading-wrap').style.display = 'flex';
@@ -236,12 +241,12 @@
             }
             document.getElementById('text-counter').innerText = input.value.length + "/100";
         }
-
-        // --- 核心帳戶身分驗證 ---
+        // --- 核心帳戶身分驗證（加入連線超時與即時抓錯提示） ---
         function performAuth() {
             const uid = document.getElementById('u-id').value.trim();
             const pw = document.getElementById('u-pw').value.trim();
             const errMsg = document.getElementById('login-error-msg');
+            const btn = document.getElementById('login-action-btn');
 
             if(!uid || !pw) {
                 errMsg.innerText = "✖ 請完整填寫帳號與密碼！";
@@ -249,10 +254,33 @@
                 return;
             }
 
+            if(!db) {
+                errMsg.innerText = "✖ 系統錯誤：Firebase 未正確初始化，請檢查 databaseURL 設定。";
+                errMsg.style.display = "block";
+                return;
+            }
+
+            // 變更按鈕狀態防止重複點擊
+            btn.disabled = true;
+            btn.innerText = "驗證憑證中...";
+            errMsg.style.display = "none";
+
+            // 設定連線超時防護鎖
+            const timeoutTimer = setTimeout(() => {
+                btn.disabled = false;
+                btn.innerText = "登入 FHeE 系統";
+                errMsg.innerText = "✖ 連線超時：無法連接到您的 Firebase 資料庫，請檢查您的網址與網路連線，或確認 Rules 規則是否已公開 (read: true)。";
+                errMsg.style.display = "block";
+            }, 6500);
+
             db.ref('users/' + uid).once('value').then(snapshot => {
+                clearTimeout(timeoutTimer);
+                btn.disabled = false;
+                btn.innerText = "登入 FHeE 系統";
+
                 const userData = snapshot.val();
                 if(!userData || userData.password !== pw) {
-                    errMsg.innerText = "✖ 驗證失敗：帳號不存在或密碼錯誤。";
+                    errMsg.innerText = "✖ 驗證失敗：帳號不存在或驗證密碼錯誤。";
                     errMsg.style.display = "block";
                     return;
                 }
@@ -265,6 +293,13 @@
                 
                 showToast("🔓 帳戶驗證成功，歡迎回到 FHeE T-OS！");
                 initRealtimeListeners();
+            }).catch(error => {
+                clearTimeout(timeoutTimer);
+                btn.disabled = false;
+                btn.innerText = "登入 FHeE 系統";
+                errMsg.innerText = "✖ 資料庫拒絕連線：" + error.message + " (請確認 Firebase Rules 規則的 .read 是否設定為 true)";
+                errMsg.style.display = "block";
+                console.error("Login Error:", error);
             });
         }
 
@@ -623,7 +658,7 @@
             }
 
             db.ref('users/' + myUid).update(updatePayload).then(() => {
-                showToast("個人設定與安全憑證已同步儲存成功！");
+                showToast("💾 個人設定與安全憑證已同步儲存成功！");
                 document.getElementById('user-modal').style.display = 'none';
             }).catch(err => {
                 alert("錯誤：" + err.message);
@@ -634,7 +669,7 @@
         function showToast(text) {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
-                        el.className = "os-toast";
+            el.className = "os-toast";
             el.innerText = text;
             container.appendChild(el);
             
@@ -653,3 +688,4 @@
     </script>
 </body>
 </html>
+
