@@ -144,13 +144,13 @@
 
     <section id="s-login" class="screen">
         <div class="login-card">
-            <h2>帳戶驗證</h2>
+            <h2>登入帳戶</h2>
             <div style="height: 15px;"></div>
             <div id="login-error-msg" style="color:var(--danger); font-size:12px; margin-top:-15px; margin-bottom:12px; display:none; font-weight:bold; line-height:1.4; word-break:break-all;"></div>
             
-            <input id="u-id" class="login-input" placeholder="帳號 ID (UID)" autocomplete="off">
-            <input id="u-pw" type="password" class="login-input" placeholder="驗證密碼">
-            <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入平台</button>
+            <input id="u-id" class="login-input" placeholder="用戶ID (T.os ID)" autocomplete="off">
+            <input id="u-pw" type="password" class="login-input" placeholder="密碼">
+            <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入</button>
         </div>
     </section>
 
@@ -306,7 +306,7 @@
             db.ref('users/' + uidInput).get().then(snap => {
                 clearTimeout(authTimeout);
                 btn.disabled = false;
-                btn.innerText = "登入平台";
+                btn.innerText = "登入";
 
                 if(!snap.exists()) {
                     errEl.innerText = "驗證失敗：帳號不存在或密碼輸入錯誤。";
@@ -336,7 +336,7 @@
             }).catch(err => {
                 clearTimeout(authTimeout);
                 btn.disabled = false;
-                btn.innerText = "登入平台";
+                btn.innerText = "登入";
                 errEl.innerText = "系統錯誤：" + err.message;
                 errEl.style.display = "block";
             });
@@ -490,7 +490,7 @@
 
         // --- 刷新當前聊天室頂部資訊與發言權限鎖 ---
         function refreshActiveChannelUI() {
-            let currentTitle = "全球大廳";
+            let currentTitle = "社群大廳";
             let reqBadge = "";
 
             if (activeChannelId.startsWith('ch5_sub')) {
@@ -509,14 +509,14 @@
 
             document.getElementById('chat-title').innerText = currentTitle;
 
-            // 檢查發言限制（Discord 唯讀鎖定邏輯）
+            // 檢查發言限制（667）
             const mInput = document.getElementById('m-input');
             const fileIn = document.getElementById('f-in');
             const upLabel = document.getElementById('upload-btn-label');
 
             if (reqBadge && myUserData.customBadge !== reqBadge && myUserData.role !== 'admin') {
                 mInput.disabled = true;
-                mInput.placeholder = `[唯讀] 您必須擁有「${reqBadge}」成員標籤才能在此發言`;
+                mInput.placeholder = `[您無法在此發送訊息] 您必須擁有「${reqBadge}」成員標籤才能在此發言`;
                 upLabel.style.opacity = "0.3";
                 upLabel.style.pointerEvents = "none";
             } else {
@@ -556,7 +556,7 @@
                         messageBody = `<img src="${encodeURI(m.imageUrl)}" class="msg-img-body" onclick="window.open('${encodeURI(m.imageUrl)}','_blank')">`;
                     }
 
-                    // 新增：只有管理員或本人可以刪除
+                    // 新增：只有管理員或本人可以刪除訊息
                     let delHtml = "";
                     if(myUserData.role === 'admin' || m.uid === myUid) {
                         delHtml = `<span class="delete-msg-btn" onclick="deleteMessage('${msgKey}')"><i class="fa-solid fa-trash"></i></span>`;
