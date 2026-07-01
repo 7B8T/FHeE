@@ -293,12 +293,12 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "正在驗證帳戶...";
+            btn.innerText = "伺服器連線中...";
             errEl.style.display = "none";
 
             authTimeout = setTimeout(() => {
                 btn.disabled = false;
-                btn.innerText = "登入平台";
+                btn.innerText = "登入";
                 errEl.innerText = "登入超時，請檢查您的網路連線是否正常。";
                 errEl.style.display = "block";
             }, 6500);
@@ -316,7 +316,7 @@
 
                 const u = snap.val();
                 if(u.status === '停權') {
-                    errEl.innerText = "您的帳號已被系統限制登入";
+                    errEl.innerText = "此帳號已被系統停權";
                     errEl.style.display = "block";
                     return;
                 }
@@ -548,7 +548,7 @@
                     const timeStr = new Date(m.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                     let badgesHtml = "";
-                    if(role === 'admin') badgesHtml += `<span class="badge-sys">官方 ✔</span>`;
+                    if(role === 'admin') badgesHtml += `<span class="badge-sys">系統官方★</span>`;
                     if(badge) badgesHtml += `<span class="badge-cust">${escapeHTML(badge)}</span>`;
 
                     let messageBody = `<div class="msg-text">${escapeHTML(m.text)}</div>`;
