@@ -151,7 +151,7 @@
             <button id="login-action-btn" onclick="performAuth()" class="login-btn">登入平台</button>
         </div>
     </section>
-
+    
     <section id="s-app" class="screen">
         <div class="app-body">
             <nav class="rail">
@@ -339,11 +339,6 @@
                 errEl.style.display = "block";
             });
         }
-
-        // --- 進入社群主畫面架構 ---
-        function enterApp() {
-            document.getElementById('s-app').classList.add('active');
-
             // 監聽本人的帳號異動（停權與強制登出）
             db.ref('users/' + myUid).on('value', snap => {
                 if(!snap.exists()) { logoutHandler(); return; }
@@ -378,9 +373,8 @@
                 channelsConfig = snap.val() || {};
                 syncChannelsLayout();
             });
-        }
-
-        // --- 同步 5 個大頻道的名稱與圖片顯示 ---
+            }
+           // --- 同步 5 個大頻道的名稱與圖片顯示 ---
         function syncChannelsLayout() {
             const chs = [
                 { id: "ch1", key: "ch1", defTitle: "全球大廳", defPfp: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150" },
@@ -549,6 +543,12 @@
                     if(role === 'admin') badgesHtml += `<span class="badge-sys">官方 ✔</span>`;
                     if(badge) badgesHtml += `<span class="badge-cust">${escapeHTML(badge)}</span>`;
 
+                    // 新增刪除按鈕功能 (檢查是否為本人或管理員)
+                    let deleteBtn = "";
+                    if (m.uid === myUid || myUserData.role === 'admin') {
+                        deleteBtn = `<i class="fa-solid fa-trash" style="cursor:pointer; color:#ff4d4d; font-size:12px; margin-left:8px;" onclick="deleteMessage('${child.key}')"></i>`;
+                    }
+
                     let messageBody = `<div class="msg-text">${escapeHTML(m.text)}</div>`;
                     if(m.type === 'image') {
                         messageBody = `<img src="${encodeURI(m.imageUrl)}" class="msg-img-body" onclick="window.open('${encodeURI(m.imageUrl)}','_blank')">`;
@@ -563,6 +563,7 @@
                                 <span class="msg-username" onclick="showUserProfile('${m.uid}')">${escapeHTML(name)}</span>
                                 ${badgesHtml}
                                 <span style="color:#4f545c; font-size:11px; font-weight:bold;">${timeStr}</span>
+                                ${deleteBtn}
                             </div>
                             ${messageBody}
                         </div>
@@ -573,6 +574,15 @@
                 const container = document.getElementById('chat-flow');
                 container.scrollTop = container.scrollHeight;
             });
+        }
+
+        // --- 刪除訊息函數 ---
+        function deleteMessage(key) {
+            if(confirm("確定要刪除這則訊息嗎？")) {
+                db.ref('messages/' + activeChannelId + '/' + key).remove().then(() => {
+                    showToast("訊息已刪除");
+                });
+            }
         }
 
         // --- 發送文字訊息 ---
@@ -593,7 +603,8 @@
                 input.value = "";
                 document.getElementById('text-counter').innerText = "0/100";
             });
-            }
+        }
+
         // --- 字數計數與強制截斷 ---
         function updateWordCount(el) {
             if(el.value.length > 100) {
@@ -782,5 +793,4 @@
         }
     </script>
 </body>
-</html>                
-                    
+</html>
