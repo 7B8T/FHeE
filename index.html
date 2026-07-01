@@ -280,99 +280,82 @@
             document.getElementById('s-login').classList.add('active');
         }
         // --- 帳戶驗證登入 ---
-        function performAuth() {
-            const uidInput = document.getElementById('u-id').value.trim().toLowerCase();
-            const pwInput = document.getElementById('u-pw').value.trim();
-            const errEl = document.getElementById('login-error-msg');
-            const btn = document.getElementById('login-action-btn');
+function performAuth() {
+    const uidInput = document.getElementById('u-id').value.trim().toLowerCase();
+    const pwInput = document.getElementById('u-pw').value.trim();
+    const errEl = document.getElementById('login-error-msg');
+    const btn = document.getElementById('login-action-btn');
 
-            if(!uidInput || !pwInput) {
-                errEl.innerText = "請填寫完所有的欄位再進行登入。";
-                errEl.style.display = "block";
-                return;
-            }
+    if(!uidInput || !pwInput) {
+        errEl.innerText = "請填寫完所有的欄位再進行登入。";
+        errEl.style.display = "block";
+        return;
+    }
 
-            btn.disabled = true;
-            btn.innerText = "伺服器連線中...";
-            errEl.style.display = "none";
+    btn.disabled = true;
+    btn.innerText = "登入中...";
+    errEl.style.display = "none";
 
-            authTimeout = setTimeout(() => {
-                btn.disabled = false;
-                btn.innerText = "登入";
-                errEl.innerText = "登入超時，請檢查您的網路連線是否正常。";
-                errEl.style.display = "block";
-            }, 6500);
+    // 將 ID 轉換為虛擬 Email 進行登入
+    const email = uidInput + "@fhee.app";
 
-            db.ref('users/' + uidInput).get().then(snap => {
-                clearTimeout(authTimeout);
-                btn.disabled = false;
-                btn.innerText = "登入";
-
-                if(!snap.exists()) {
-                    errEl.innerText = "驗證失敗：帳號不存在或密碼輸入錯誤。";
-                    errEl.style.display = "block";
-                    return;
-                }
-
+    firebase.auth().signInWithEmailAndPassword(email, pwInput)
+        .then((userCredential) => {
+            // 登入成功
+            const user = userCredential.user;
+            
+            // 從資料庫獲取該用戶的詳細資訊 (如角色、狀態)
+            db.ref('users/' + uidInput).once('value').then(snap => {
                 const u = snap.val();
-                if(u.status === '停權') {
+                if(u && u.status === '停權') {
+                    firebase.auth().signOut();
                     errEl.innerText = "此帳號已被系統停權";
                     errEl.style.display = "block";
+                    btn.disabled = false;
+                    btn.innerText = "登入";
                     return;
                 }
-
-                if(u.password === pwInput) {
-                    myUid = uidInput;
-                    myUserData = u;
-                    localStorage.setItem('fhee_uid', myUid);
-                    localStorage.setItem('fhee_login_ts', Date.now());
-                    
-                    document.getElementById('s-login').classList.remove('active');
-                    enterApp();
-                } else {
-                    errEl.innerText = "驗證失敗：帳號不存在或密碼輸入錯誤。";
-                    errEl.style.display = "block";
-                }
-            }).catch(err => {
-                clearTimeout(authTimeout);
-                btn.disabled = false;
-                btn.innerText = "登入";
-                errEl.innerText = "系統錯誤：" + err.message;
-                errEl.style.display = "block";
-            });
-        }
-        // --- 進入社群主畫面架構 ---
-        function enterApp() {
-            document.getElementById('s-app').classList.add('active');
-
-            // 監聽本人的帳號異動（停權與強制登出）
-            db.ref('users/' + myUid).on('value', snap => {
-                if(!snap.exists()) { logoutHandler(); return; }
-                const u = snap.val();
-                if(u.status === '停權') { logoutHandler(); return; }
                 
-                const currentLoginTs = localStorage.getItem('fhee_login_ts') || 0;
-                if(u.force_logout_ts && u.force_logout_ts > currentLoginTs) {
-                    logoutHandler();
-                    return;
-                }
+                myUid = uidInput;
                 myUserData = u;
+                localStorage.setItem('fhee_uid', myUid);
+                localStorage.setItem('fhee_login_ts', Date.now());
+                
+                document.getElementById('s-login').classList.remove('active');
+                enterApp();
             });
+        })
+        .catch((err) => {
+            btn.disabled = false;
+            btn.innerText = "登入";
+            errEl.innerText = "驗證失敗：帳號不存在或密碼錯誤。";
+            errEl.style.display = "block";
+        });
+}
 
-            // 監聽全域使用者資料
-            db.ref('users').on('value', snap => {
-                globalUsers = snap.val() || {};
-            });
+function enterApp() {
+    document.getElementById('s-app').classList.add('active');
 
-            // 監聽系統公告
-            db.ref('system_announcement').on('value', snap => {
-                if(snap.exists()) {
-                    const ann = snap.val();
-                    document.getElementById('ann-modal-title').innerHTML = `<i class="fa-solid fa-bullhorn"></i> ` + escapeHTML(ann.title);
-                    document.getElementById('ann-modal-body').innerText = ann.content;
-                    document.getElementById('ann-modal').style.display = 'flex';
-                }
-            });
+    // 監聽本人的帳號異動
+    db.ref('users/' + myUid).on('value', snap => {
+        if(!snap.exists()) { logoutHandler(); return; }
+        const u = snap.val();
+        if(u.status === '停權') { logoutHandler(); return; }
+        
+        const currentLoginTs = localStorage.getItem('fhee_login_ts') || 0;
+        if(u.force_logout_ts && u.force_logout_ts > currentLoginTs) {
+            logoutHandler();
+            return;
+        }
+        myUserData = u;
+    });
+
+    // 重要修改：不再監聽整份 users 資料庫，保護隱私
+    // 如果你的功能一定要讀取全部人，請務必配合高安全規則
+    db.ref('users').once('value', snap => {
+        globalUsers = snap.val() || {};
+    });
+}
 
             // 監聽 5 個大頻道的動態設定與圖片
             db.ref('channels_config').on('value', snap => {
