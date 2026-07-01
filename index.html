@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FHeE 社群平台 正式版</title>
+    <title>FHeE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -316,7 +316,7 @@
 
                 const u = snap.val();
                 if(u.status === '停權') {
-                    errEl.innerText = "您的帳號已被系統限制登入，如有疑問請聯絡管理層。";
+                    errEl.innerText = "您的帳號已被系統限制登入";
                     errEl.style.display = "block";
                     return;
                 }
@@ -384,7 +384,7 @@
         // --- 同步 5 個大頻道的名稱與圖片顯示 ---
         function syncChannelsLayout() {
             const chs = [
-                { id: "ch1", key: "ch1", defTitle: "全球大廳", defPfp: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=150" },
+                { id: "ch1", key: "ch1", defTitle: "全球大廳", defPfp: "https://cdn.discordapp.com/attachments/1517915754123755600/1521301348782444574/175.png?ex=6a45a749&is=6a4455c9&hm=98c70b61a0d2d5fac1b85373d282d05096a539975f3de818486085d633ab8249&" },
                 { id: "ch2", key: "ch2", defTitle: "綜合特區", defPfp: "" },
                 { id: "ch3", key: "ch3", defTitle: "公告欄", defPfp: "" },
                 { id: "ch4", key: "ch4", defTitle: "團隊交友", defPfp: "" },
